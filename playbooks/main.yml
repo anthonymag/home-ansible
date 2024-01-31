@@ -1,0 +1,11 @@
+- name: Test file 
+  hosts: hub
+  tasks:
+    - name: Ensure the /home/ant/ansible-test.txt file exists with the specified content
+      ansible.builtin.copy:
+        dest: "/home/ant/ansible-test.txt"
+        content: "it works"
+        owner: ant
+        group: ant
+        mode: '0644'
+
