@@ -1,0 +1,25 @@
+---
+- name: Uninstall K3s and Remove ArgoCD
+  hosts: k3s_cluster
+  become: yes
+  tasks:
+    - name: Remove ArgoCD Namespace
+      ansible.builtin.shell: |
+        kubectl delete namespace argocd
+      environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+      ignore_errors: yes
+
+    - name: Uninstall K3s
+      ansible.builtin.shell: /usr/local/bin/k3s-uninstall.sh
+      ignore_errors: yes
+
+    - name: Ensure K3s is Completely Removed
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /usr/local/bin/k3s
+        - /etc/rancher/k3s
+        - /var/lib/rancher/k3s
+
