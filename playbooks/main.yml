@@ -1,12 +1,4 @@
-- name: Test file 
+- name: Copy new music to Navidrome
   hosts: hub
-  tasks:
-    - name: Ensure the /home/ant/ansible-test.txt file exists with the specified content
-      ansible.builtin.copy:
-        dest: "/home/ant/ansible-test.txt"
-        content: "it works"
-        owner: ant
-        group: ant
-        mode: '0644'
-    - name: Apply docker compose
-      
+  roles:
+    - { role: navidrome, tags: ["music"] }
