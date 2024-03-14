@@ -1,17 +1,11 @@
-- name: Copy new music to Navidrome
+- name: copy new music to navidrome
   become: true
   ansible.builtin.synchronize:
     src: ../new-music/
     dest: /root/music/
     recursive: true
     delete: false
-    rsync_opts:
-      - "-v"
+  notify: restart navidrome
 
-- name: Restart Navidrome
-  become: true
-  ansible.builtin.shell: docker compose restart navidrome
-  args:
-    chdir: /root/
-  when: ansible_facts['synchronize'] is changed
-
+# trigger navidrome restart now rather than at the end of the play
+- meta: flush_handlers
