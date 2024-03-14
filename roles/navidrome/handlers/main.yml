@@ -1,0 +1,5 @@
+- name: restart navidrome
+  become: true
+  ansible.builtin.shell: docker compose restart navidrome
+  args:
+    chdir: /root/
