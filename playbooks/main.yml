@@ -1,4 +1,10 @@
-- name: Copy new music to Navidrome
+- name: install packages
+  hosts: hub
+  become: true
+  roles:
+    - { role: packages, tags: ["packages"] }
+
+- name: configure navidrome
   hosts: hub
   roles:
     - { role: navidrome, tags: ["music"] }
