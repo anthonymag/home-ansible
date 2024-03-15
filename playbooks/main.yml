@@ -1,3 +1,50 @@
+- name: Retrieve secrets
+  hosts: localhost
+  vars_files:
+    - ../vars/vars.yml
+  tasks:
+
+    - name: AWS Secrets Manager - Lookup Bitwarden secrets
+      set_fact:
+        bitwarden_secret: "{{ lookup('amazon.aws.aws_secret', 'home/lab/bitwarden') }}"
+      no_log: true
+
+    - name: Bitwarden login
+      shell: |
+        bw login --apikey 2>/dev/null
+      environment:
+        BW_CLIENTID: "{{ bitwarden_secret.BW_CLIENTID }}"
+        BW_CLIENTSECRET: "{{ bitwarden_secret.BW_CLIENTSECRET }}"
+      no_log: true
+
+    - name: Bitwaden unlock vault
+      shell: |
+        bw unlock --passwordenv BW_PASSWORD --raw 2>/dev/null
+      environment:
+        BW_PASSWORD: "{{ bitwarden_secret.BW_PASSWORD }}"
+      register: bw_session_key
+      no_log: true
+
+    - name: Lookup Bitwarden item for secrets
+      shell: |
+        bw get item {{ bitwarden_secret.BW_SECRET_ITEM_ID }} 2>/dev/null
+      environment:
+        BW_SESSION: "{{ bw_session_key.stdout }}"
+      register: bw_output
+      no_log: true
+
+    - name: Parse Bitwarden output
+      set_fact:
+        bw_secrets: "{{ (bw_output.stdout | from_json).fields }}"
+      no_log: true
+
+    - name: Bitwarden logout
+      shell: |
+        bw logout 2>/dev/null
+      no_log: true
+  tags:
+  - always
+
 - name: install packages
   hosts: hub
   become: true
@@ -8,3 +55,8 @@
   hosts: hub
   roles:
     - { role: navidrome, tags: ["music"] }
+
+- name: Apply Docker Compose
+  hosts: hub
+  roles:
+    - { role: docker_compose, tags: ["docker_compose"] }
