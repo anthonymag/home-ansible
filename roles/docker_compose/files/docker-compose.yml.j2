@@ -153,6 +153,25 @@ services:
       options:
         max-file: "10"
         max-size: "200k"
+  sabnzbd:
+    image: lscr.io/linuxserver/sabnzbd:latest
+    container_name: sabnzbd
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - sabnzbd-config:/config
+      - /downloads:/downloads
+      - /downloads/incomplete:/incomplete-downloads
+    ports:
+      - 8990:8080
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "200k"
   sonarr:
     image: lscr.io/linuxserver/sonarr:latest
     container_name: sonarr
@@ -254,6 +273,8 @@ volumes:
   navidrome-data:
   prowlarr-data:
     name: prowlarr-data
+  sabnzbd-config:
+    name: sabnzbd-config
   sonarr-data:
     name: sonarr-data
   speedtest-data:
