@@ -1,16 +1,82 @@
 version: '3.2'
 services:
-  nginx:
-    image: 'jc21/nginx-proxy-manager:latest'
-    container_name: nginx
+  cloudflared:
+    container_name: cloudflared
+    image: cloudflare/cloudflared:1347-4c3417fedda9
     restart: unless-stopped
-    ports:
-      - '8000:80'
-      - '81:81'
-      - '443:443'
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN={{ cloudflared_tunnel_token }}
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "200k"
+  dozzle:
+    container_name: dozzle
+    image: amir20/dozzle:latest
     volumes:
-      - ./data:/data
-      - ./letsencrypt:/etc/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - 9999:8080
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "200k"
+  esphome:
+    image: esphome/esphome:latest
+    container_name: esphome
+    volumes:
+      - esphome-config:/config:rw
+      # Use local time for logging timestamps
+      - /etc/localtime:/etc/localtime:ro
+    network_mode: host
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "200k"
+  homeassistant:
+    container_name: homeassistant
+    image: ghcr.io/home-assistant/home-assistant:2024.3
+    volumes:
+      - /root/home-assistant-config:/config
+      - /etc/localtime:/etc/localtime:ro
+      - /run/dbus:/run/dbus:ro
+    restart: unless-stopped
+    privileged: true
+    network_mode: host
+  homeassistant-s3-backup:
+    container_name: homeassistant-s3-backup
+    image: istepanov/backup-to-s3:latest
+    restart: always
+    environment:
+      - ACCESS_KEY={{ s3_backup_aws_access_key }}
+      - 'SECRET_KEY={{ s3_backup_aws_secret_key }}'
+      - S3_PATH=s3://anthonymag-backups/homeassistant/
+      - 'CRON_SCHEDULE=0 4 * * *'
+    volumes:
+      - /root/home-assistant-config/backups:/data:ro
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "200k"
+  mosquitto:
+    image: eclipse-mosquitto:latest
+    restart: always
+    network_mode: host
+    container_name: mqtt
+    ports:
+      - 1883:1883
+      - 9001:9001
+    volumes:
+      - /root/mosquitto/config:/mosquitto/config
+      - /root/mosquitto/data:/mosquitto/data
+      - /root/mosquitto/log:/mosquitto/log
     logging:
       driver: "json-file"
       options:
@@ -38,16 +104,57 @@ services:
       options:
         max-file: "10"
         max-size: "200k"
-  homeassistant:
-    container_name: homeassistant
-    image: ghcr.io/home-assistant/home-assistant:2024.3
-    volumes:
-      - /root/home-assistant-config:/config
-      - /etc/localtime:/etc/localtime:ro
-      - /run/dbus:/run/dbus:ro
+  nginx:
+    image: 'jc21/nginx-proxy-manager:latest'
+    container_name: nginx
     restart: unless-stopped
-    privileged: true
-    network_mode: host
+    ports:
+      - '8000:80'
+      - '81:81'
+      - '443:443'
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "200k"
+  root-s3-backup:
+    container_name: root-s3-backup
+    image: istepanov/backup-to-s3:latest
+    restart: always
+    environment:
+      - ACCESS_KEY={{ s3_backup_aws_access_key }}
+      - 'SECRET_KEY={{ s3_backup_aws_secret_key }}'
+      - S3_PATH=s3://anthonymag-backups/root/
+      - 'CRON_SCHEDULE=0 5 * * *'
+    volumes:
+      - /root-backups:/data:ro
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "200k"
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - /path/to/data:/config
+      - /media/tv:/tv
+      - /downloads:/downloads
+    ports:
+      - 8989:8989
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "200k"
   speedtest:
     container_name: speedtest
     image: henrywhitaker3/speedtest-tracker:dev
@@ -66,6 +173,18 @@ services:
         max-file: "10"
         max-size: "200k"
     restart: unless-stopped
+  speedtest-server:
+    restart: unless-stopped
+    container_name: openspeedtest
+    ports:
+        - '3030:3000'
+        - '3031:3001'
+    image: openspeedtest/latest:v0.0.1
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "200k"
   zigbee2mqtt:
     container_name: zigbee2mqtt
     image: koenkk/zigbee2mqtt:latest
@@ -79,36 +198,6 @@ services:
       - TZ=America/New_York
     devices:
       - /dev/serial/by-id/usb-ITead_Sonoff_Zigbee_3.0_USB_Dongle_Plus_323cbd3fdb66ec11b6f72342ef680de7-if00-port0:/dev/ttyACM0
-    logging:
-      driver: "json-file"
-      options:
-        max-file: "10"
-        max-size: "200k"
-  mosquitto:
-    image: eclipse-mosquitto:latest
-    restart: always
-    network_mode: host
-    container_name: mqtt
-    ports:
-      - 1883:1883
-      - 9001:9001
-    volumes:
-      - /root/mosquitto/config:/mosquitto/config
-      - /root/mosquitto/data:/mosquitto/data
-      - /root/mosquitto/log:/mosquitto/log
-    logging:
-      driver: "json-file"
-      options:
-        max-file: "10"
-        max-size: "200k"
-  dozzle:
-    container_name: dozzle
-    image: amir20/dozzle:latest
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    ports:
-      - 9999:8080
-    restart: unless-stopped
     logging:
       driver: "json-file"
       options:
@@ -140,82 +229,14 @@ services:
       options:
         max-file: "10"
         max-size: "200k"
-  homeassistant-s3-backup:
-    container_name: homeassistant-s3-backup
-    image: istepanov/backup-to-s3:latest
-    restart: always
-    environment:
-      - ACCESS_KEY={{ s3_backup_aws_access_key }}
-      - 'SECRET_KEY={{ s3_backup_aws_secret_key }}'
-      - S3_PATH=s3://anthonymag-backups/homeassistant/
-      - 'CRON_SCHEDULE=0 4 * * *'
-    volumes:
-      - /root/home-assistant-config/backups:/data:ro
-    logging:
-      driver: "json-file"
-      options:
-        max-file: "10"
-        max-size: "200k"
-  root-s3-backup:
-    container_name: root-s3-backup
-    image: istepanov/backup-to-s3:latest
-    restart: always
-    environment:
-      - ACCESS_KEY={{ s3_backup_aws_access_key }}
-      - 'SECRET_KEY={{ s3_backup_aws_secret_key }}'
-      - S3_PATH=s3://anthonymag-backups/root/
-      - 'CRON_SCHEDULE=0 5 * * *'
-    volumes:
-      - /root-backups:/data:ro
-    logging:
-      driver: "json-file"
-      options:
-        max-file: "10"
-        max-size: "200k"
-  cloudflared:
-    container_name: cloudflared
-    image: cloudflare/cloudflared:1347-4c3417fedda9
-    restart: unless-stopped
-    command: tunnel run
-    environment:
-      - TUNNEL_TOKEN={{ cloudflared_tunnel_token }}
-    logging:
-      driver: "json-file"
-      options:
-        max-file: "10"
-        max-size: "200k"
-  speedtest-server:
-    restart: unless-stopped
-    container_name: openspeedtest
-    ports:
-        - '3030:3000'
-        - '3031:3001'
-    image: openspeedtest/latest:v0.0.1
-    logging:
-      driver: "json-file"
-      options:
-        max-file: "10"
-        max-size: "200k"
-  esphome:
-    image: esphome/esphome:latest
-    container_name: esphome
-    volumes:
-      - esphome-config:/config:rw
-      # Use local time for logging timestamps
-      - /etc/localtime:/etc/localtime:ro
-    network_mode: host
-    restart: always
-    logging:
-      driver: "json-file"
-      options:
-        max-file: "10"
-        max-size: "200k"
 networks:
   zwave:
 volumes:
+  esphome-config:
+  media:
+  navidrome-data:
+  sonarr-data:
+    name: sonarr-data
+  speedtest-data:
   zwave-config:
     name: zwave-config
-  speedtest-data:
-  esphome-config:
-  navidrome-data:
-  media:
