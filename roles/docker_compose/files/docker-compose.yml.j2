@@ -120,6 +120,23 @@ services:
       options:
         max-file: "10"
         max-size: "200k"
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - prowlarr-data:/config
+    ports:
+      - 9696:9696
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "200k"
   root-s3-backup:
     container_name: root-s3-backup
     image: istepanov/backup-to-s3:latest
@@ -144,7 +161,7 @@ services:
       - PGID=1000
       - TZ=Etc/UTC
     volumes:
-      - /path/to/data:/config
+      - sonarr-data:/config
       - /media/tv:/tv
       - /downloads:/downloads
     ports:
@@ -235,6 +252,8 @@ volumes:
   esphome-config:
   media:
   navidrome-data:
+  prowlarr-data:
+    name: prowlarr-data
   sonarr-data:
     name: sonarr-data
   speedtest-data:
