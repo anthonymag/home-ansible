@@ -1,0 +1,44 @@
+---
+# For configuration options and examples, please see:
+# https://gethomepage.dev/latest/configs/services
+
+- Media:
+    - Jellyfin:
+        href: https://jellyfin.antcar.casa
+        icon: si-#00A4DC
+    - Navidrome:
+        href: https://music.antcar.casa
+        icon: mdi-F075A
+    - Prowlarr:
+        href: http://hub.antcar:9696
+        icon: si-#CD792C
+    - Sonarr: 
+        href: http://hub.antcar:8989
+        icon: si-#2596BE
+    - Bazarr:
+        href: http://hub.antcar:6767
+        icon: mdi-F0A16
+    - SabNZBD:
+        href: http://192.168.1.4:8990
+        icon: mdi-F1462
+
+- Home Automation:
+    - Home Assistant:
+        href: https://ha.antcar.casa
+        icon: si-#18BCF2
+    - Zigbee2MQTT:
+        href: http://hub.antcar:8080
+        icon: si-#EB0443
+    - ZWave-JS-UI:
+        href: http://hub.antcar:8091
+        icon: mdi-F0AEA
+    - ESPHome:
+        href: http://hub.antcar:6052
+        icon: si-#000000
+- Observability:
+    - Dozzle:
+        href: http://hub.antcar:9999
+        icon: mdi-F1085
+    - Speedtest:
+        href: http://hub.antcar:8765
+        icon: si-#141526
