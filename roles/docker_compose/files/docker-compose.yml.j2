@@ -1,5 +1,30 @@
 version: '3.2'
 services:
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - bazarr-config:/config
+      - /media/movies:/movies
+      - /media/tv:/tv 
+    ports:
+      - 6767:6767
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "200k"
+    labels:
+      - homepage.group=Media
+      - homepage.name=Bazarr
+      - homepage.icon=mdi-F0A16
+      - homepage.href=http://hub.antcar:6767
+
   cloudflared:
     container_name: cloudflared
     image: cloudflare/cloudflared:1347-4c3417fedda9
@@ -12,6 +37,7 @@ services:
       options:
         max-file: "10"
         max-size: "200k"
+
   dozzle:
     container_name: dozzle
     image: amir20/dozzle:latest
@@ -25,6 +51,12 @@ services:
       options:
         max-file: "10"
         max-size: "200k"
+    labels:
+      - homepage.group=Observability
+      - homepage.name=Dozzle
+      - homepage.icon=mdi-F1085
+      - homepage.href=http://hub.antcar:9999
+
   esphome:
     image: esphome/esphome:latest
     container_name: esphome
@@ -39,6 +71,12 @@ services:
       options:
         max-file: "10"
         max-size: "200k"
+    labels:
+      - 'homepage.group=Home Automation'
+      - homepage.name=ESPHome
+      - homepage.icon=si-#000000
+      - homepage.href=http://hub.antcar:6052
+
   homeassistant:
     container_name: homeassistant
     image: ghcr.io/home-assistant/home-assistant:2024.3
@@ -49,6 +87,12 @@ services:
     restart: unless-stopped
     privileged: true
     network_mode: host
+    labels:
+      - 'homepage.group=Home Automation'
+      - 'homepage.name=Home Assistant'
+      - homepage.icon=si-#18BCF2
+      - homepage.href=https://ha.antcar.casa
+
   homeassistant-s3-backup:
     container_name: homeassistant-s3-backup
     image: istepanov/backup-to-s3:latest
@@ -65,6 +109,53 @@ services:
       options:
         max-file: "10"
         max-size: "200k"
+
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage
+    ports:
+      - 3001:3000
+    volumes:
+      - homepage-config:/app/config
+      - /var/run/docker.sock:/var/run/docker.sock 
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "200k"
+
+  jellyfin:
+    image: jellyfin/jellyfin
+    container_name: jellyfin
+    user: root:root
+    network_mode: 'host'
+    volumes:
+      - jellyfin-config:/config
+      - jellyfin-cache:/cache
+      - type: bind
+        source: /media/tv
+        target: /media/tv
+      - type: bind
+        source: /media/movies
+        target: /media/movies
+    restart: 'unless-stopped'
+    # Optional - alternative address used for autodiscovery
+    environment:
+      - JELLYFIN_PublishedServerUrl=https://jellyfin.antcar.casa
+    # Optional - may be necessary for docker healthcheck to pass if running in host network mode
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "200k"
+    labels:
+      - homepage.group=Media
+      - homepage.name=Jellyfin
+      - homepage.icon=si-#00A4DC
+      - homepage.href=https://jellyfin.antcar.casa
+
   mosquitto:
     image: eclipse-mosquitto:latest
     restart: always
@@ -82,6 +173,7 @@ services:
       options:
         max-file: "10"
         max-size: "200k"
+
   navidrome:
     image: deluan/navidrome:latest
     container_name: navidrome
@@ -104,6 +196,12 @@ services:
       options:
         max-file: "10"
         max-size: "200k"
+    labels:
+      - homepage.group=Media
+      - homepage.name=Navidrome
+      - homepage.icon=mdi-F075A
+      - homepage.href=https://music.antcar.casa
+
   nginx:
     image: 'jc21/nginx-proxy-manager:latest'
     container_name: nginx
@@ -120,6 +218,7 @@ services:
       options:
         max-file: "10"
         max-size: "200k"
+
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
@@ -137,6 +236,12 @@ services:
       options:
         max-file: "10"
         max-size: "200k"
+    labels:
+      - homepage.group=Media
+      - homepage.name=Prowlarr
+      - homepage.icon=si-#CD792C
+      - homepage.href=http://hub.antcar:9696
+
   root-s3-backup:
     container_name: root-s3-backup
     image: istepanov/backup-to-s3:latest
@@ -153,6 +258,7 @@ services:
       options:
         max-file: "10"
         max-size: "200k"
+
   sabnzbd:
     image: lscr.io/linuxserver/sabnzbd:latest
     container_name: sabnzbd
@@ -162,8 +268,7 @@ services:
       - TZ=Etc/UTC
     volumes:
       - sabnzbd-config:/config
-      - /downloads:/downloads
-      - /downloads/incomplete:/incomplete-downloads
+      - /media/downloads:/downloads
     ports:
       - 8990:8080
     restart: unless-stopped
@@ -172,6 +277,12 @@ services:
       options:
         max-file: "10"
         max-size: "200k"
+    labels:
+      - homepage.group=Media
+      - homepage.name=sabNZBD
+      - homepage.icon=mdi-F1462
+      - homepage.href=http://192.168.1.4:8990
+
   sonarr:
     image: lscr.io/linuxserver/sonarr:latest
     container_name: sonarr
@@ -181,8 +292,8 @@ services:
       - TZ=Etc/UTC
     volumes:
       - sonarr-data:/config
-      - /media/tv:/tv
-      - /downloads:/downloads
+      - /media/tv:/media
+      - /media/downloads:/downloads
     ports:
       - 8989:8989
     restart: unless-stopped
@@ -191,6 +302,12 @@ services:
       options:
         max-file: "10"
         max-size: "200k"
+    labels:
+      - homepage.group=Media
+      - homepage.name=Sonarr
+      - homepage.icon=si-#2596BE
+      - homepage.href=http://hub.antcar:8989
+
   speedtest:
     container_name: speedtest
     image: henrywhitaker3/speedtest-tracker:dev
@@ -209,18 +326,12 @@ services:
         max-file: "10"
         max-size: "200k"
     restart: unless-stopped
-  speedtest-server:
-    restart: unless-stopped
-    container_name: openspeedtest
-    ports:
-        - '3030:3000'
-        - '3031:3001'
-    image: openspeedtest/latest:v0.0.1
-    logging:
-      driver: "json-file"
-      options:
-        max-file: "10"
-        max-size: "200k"
+    labels:
+      - homepage.group=Observability
+      - homepage.name=Speedtest
+      - homepage.icon=si-#141526
+      - homepage.href=http://hub.antcar:8765
+    
   zigbee2mqtt:
     container_name: zigbee2mqtt
     image: koenkk/zigbee2mqtt:latest
@@ -239,6 +350,12 @@ services:
       options:
         max-file: "10"
         max-size: "200k"
+    labels:
+      - 'homepage.group=Home Automation'
+      - homepage.name=Zigbee2MQTT
+      - homepage.icon=si-#EB0443
+      - homepage.href=http://hub.antcar:8080
+        
   zwave-js-ui:
     container_name: zwave
     image: zwavejs/zwave-js-ui:latest
@@ -265,11 +382,21 @@ services:
       options:
         max-file: "10"
         max-size: "200k"
+    labels:
+      - 'homepage.group=Home Automation'
+      - homepage.name=ZWave-JS-UI
+      - homepage.icon=mdi-F0AEA
+      - homepage.href=http://hub.antcar:8091
+
 networks:
   zwave:
 volumes:
+  bazarr-config:
   esphome-config:
+  homepage-config:
   media:
+  jellyfin-config:
+  jellyfin-cache:
   navidrome-data:
   prowlarr-data:
     name: prowlarr-data
