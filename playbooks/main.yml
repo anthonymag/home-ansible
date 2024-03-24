@@ -60,3 +60,8 @@
   hosts: hub
   roles:
     - { role: docker_compose, tags: ["docker_compose"] }
+
+- name: Configure Homepage
+  hosts: hub
+  roles:
+    - { role: homepage, tags: ["homepage"] }
