@@ -56,12 +56,17 @@
   roles:
     - { role: navidrome, tags: ["music"] }
 
-- name: Apply Docker Compose
-  hosts: hub
-  roles:
-    - { role: docker_compose, tags: ["docker_compose"] }
-
 - name: Configure Homepage
   hosts: hub
   roles:
     - { role: homepage, tags: ["homepage"] }
+
+- name: Configure Prometheus
+  hosts: hub
+  roles:
+    - { role: prometheus, tags: ["prometheus"] }
+
+- name: Apply Docker Compose
+  hosts: hub
+  roles:
+    - { role: docker_compose, tags: ["docker_compose"] }
