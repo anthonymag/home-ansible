@@ -1,0 +1,13 @@
+- name: Template Docker daemon file
+  template:
+    src: ../files/docker-daemon.json
+    dest: /etc/docker/daemon.json 
+  become: true
+
+- name: Template Prometheus configs
+  template:
+    src: ../files/prometheus.yaml
+    dest: /var/lib/prometheus/prometheus.yaml
+  become: true
+
+
