@@ -25,6 +25,29 @@ services:
       - homepage.icon=mdi-F0A16
       - homepage.href=http://hub.antcar:6767
 
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    ports:
+    - 8359:8080
+    volumes:
+    - /:/rootfs:ro
+    - /var/run:/var/run:rw
+    - /sys:/sys:ro
+    - /var/lib/docker/:/var/lib/docker:ro
+    depends_on:
+    - redis
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "200k"
+    labels:
+      - homepage.group=Observability
+      - homepage.name=CAdvisor
+      - homepage.icon=mdi-F0A16
+      - homepage.href=http://hub.antcar:8359
+
   cloudflared:
     container_name: cloudflared
     image: cloudflare/cloudflared:1347-4c3417fedda9
@@ -76,6 +99,25 @@ services:
       - homepage.name=ESPHome
       - homepage.icon=si-#000000
       - homepage.href=http://hub.antcar:6052
+
+  grafana:
+    image: grafana/grafana-oss
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+     - '3002:3000'
+    volumes:
+      - grafana:/var/live/grafana
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "200k"
+    labels:
+      - homepage.group=Observability
+      - homepage.name=Grafana
+      - homepage.icon=mdi-F1085
+      - homepage.href=http://hub.antcar:3002
 
   homeassistant:
     container_name: homeassistant
@@ -190,7 +232,7 @@ services:
       - 'ND_UILOGINBACKGROUNDURL=aHR0cHM6Ly9mcmVlNGt3YWxscGFwZXJzLmNvbS91cGxvYWRzL29yaWdpbmFscy8yMDIwLzAyLzI1L3BlcnNvbmEtbmlnaHR0aW1lLXRva3lvLXdhbGxwYXBlcgo='
     volumes:
       - navidrome-data:/data
-      - /root/music:/music:ro
+      - /media/music:/music:ro
     logging:
       driver: "json-file"
       options:
@@ -219,6 +261,32 @@ services:
         max-file: "10"
         max-size: "200k"
 
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yaml'
+    depends_on:
+    - cadvisor
+    ports:
+      - 9090:9090
+    restart: unless-stopped
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    volumes:
+      - /var/lib/prometheus:/etc/prometheus
+      - prom-data:/prometheus
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "200k"
+    labels:
+      - homepage.group=Observability
+      - homepage.name=Prometheus
+      - homepage.icon=mdi-F075A
+      - homepage.href=http://hub.antcar:9090
+
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
@@ -241,6 +309,17 @@ services:
       - homepage.name=Prowlarr
       - homepage.icon=si-#CD792C
       - homepage.href=http://hub.antcar:9696
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+    - 6379:6379
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "200k"
 
   root-s3-backup:
     container_name: root-s3-backup
@@ -282,6 +361,37 @@ services:
       - homepage.name=sabNZBD
       - homepage.icon=mdi-F1462
       - homepage.href=http://192.168.1.4:8990
+
+  samba:
+    image: ghcr.io/servercontainers/samba:latest
+    container_name: samba
+    restart: unless-stopped
+    environment:
+      ACCOUNT_{{ samba_username01 }}: {{ samba_password01 }}
+      ACCOUNT_{{ samba_username02 }}: {{ samba_password02 }}
+      UID_{{ samba_username01 }}: 102
+      UID_{{ samba_username02 }}: 101
+      SAMBA_VOLUME_CONFIG_media: |
+        [media]
+         path = /shares/media
+         guest ok = no
+         browseable = yes
+         public = no
+         writeable = yes
+         available = yes
+         valid users = {{ samba_username01 }}, {{ samba_username02 }}
+      SAMBA_CONF_LOG_LEVEL: 3
+    volumes:
+      - /media:/shares/media
+    ports:
+      - 445:445
+    cap_add:
+      - CAP_NET_ADMIN
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "200k"
 
   sonarr:
     image: lscr.io/linuxserver/sonarr:latest
@@ -393,11 +503,15 @@ networks:
 volumes:
   bazarr-config:
   esphome-config:
+  grafana:
+    name: grafana
   homepage-config:
   media:
   jellyfin-config:
   jellyfin-cache:
   navidrome-data:
+  prom-data:
+    name: prom-data
   prowlarr-data:
     name: prowlarr-data
   sabnzbd-config:
