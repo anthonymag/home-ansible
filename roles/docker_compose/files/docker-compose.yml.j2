@@ -1,5 +1,6 @@
 version: '3.2'
 services:
+
   bazarr:
     image: lscr.io/linuxserver/bazarr:latest
     container_name: bazarr
@@ -60,6 +61,34 @@ services:
       options:
         max-file: "10"
         max-size: "200k"
+
+  deluge:
+    image: lscr.io/linuxserver/deluge:latest
+    container_name: deluge
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - DELUGE_LOGLEVEL=info
+    volumes:
+      - deluge-config:/config
+      - /media/downloads:/downloads
+    ports:
+      - 8112:8112
+      - 6881:6881
+      - 6881:6881/udp
+      - 58846:58846 #optional
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "200k"
+    labels:
+      - 'homepage.group=Media'
+      - homepage.name=Deluge
+      - homepage.icon=si-#EB0443
+      - homepage.href=http://hub.antcar:8112
 
   dozzle:
     container_name: dozzle
@@ -180,6 +209,9 @@ services:
       - type: bind
         source: /media/movies
         target: /media/movies
+      - type: bind
+        source: /media/anime
+        target: /media/anime
     restart: 'unless-stopped'
     # Optional - alternative address used for autodiscovery
     environment:
@@ -196,7 +228,7 @@ services:
       - homepage.group=Media
       - homepage.name=Jellyfin
       - homepage.icon=si-#00A4DC
-      - homepage.href=https://jellyfin.antcar.casa
+      - homepage.href=http://hub.antcar:8096
 
   mosquitto:
     image: eclipse-mosquitto:latest
@@ -393,9 +425,9 @@ services:
         max-file: "10"
         max-size: "200k"
 
-  sonarr:
+  sonarr-tv:
     image: lscr.io/linuxserver/sonarr:latest
-    container_name: sonarr
+    container_name: sonarr-tv
     environment:
       - PUID=1000
       - PGID=1000
@@ -414,9 +446,34 @@ services:
         max-size: "200k"
     labels:
       - homepage.group=Media
-      - homepage.name=Sonarr
+      - 'homepage.name=Sonarr (TV)'
       - homepage.icon=si-#2596BE
       - homepage.href=http://hub.antcar:8989
+
+  sonarr-anime:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr-anime
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - sonarr-anime-data:/config
+      - /media/anime:/media
+      - /media/downloads:/downloads
+    ports:
+      - 8991:8989
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "200k"
+    labels:
+      - homepage.group=Media
+      - 'homepage.name=Sonarr (Anime)'
+      - homepage.icon=si-#2596BE
+      - homepage.href=http://hub.antcar:8991
 
   speedtest:
     container_name: speedtest
@@ -502,6 +559,7 @@ networks:
   zwave:
 volumes:
   bazarr-config:
+  deluge-config:
   esphome-config:
   grafana:
     name: grafana
@@ -518,6 +576,8 @@ volumes:
     name: sabnzbd-config
   sonarr-data:
     name: sonarr-data
+  sonarr-anime-data:
+    name: sonarr-anime-data
   speedtest-data:
   zwave-config:
     name: zwave-config
