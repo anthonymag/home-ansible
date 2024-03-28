@@ -23,7 +23,7 @@ services:
     labels:
       - homepage.group=Media
       - homepage.name=Bazarr
-      - homepage.icon=mdi-F0A16
+      - homepage.icon=https://raw.githubusercontent.com/morpheus65535/bazarr/master/frontend/public/images/logo64.png
       - homepage.href=http://hub.antcar:6767
 
   cadvisor:
@@ -46,7 +46,7 @@ services:
     labels:
       - homepage.group=Observability
       - homepage.name=CAdvisor
-      - homepage.icon=mdi-F0A16
+      - homepage.icon=https://netdata.cloud/img/cadvisor.png
       - homepage.href=http://hub.antcar:8359
 
   cloudflared:
@@ -87,7 +87,7 @@ services:
     labels:
       - 'homepage.group=Media'
       - homepage.name=Deluge
-      - homepage.icon=si-#EB0443
+      - homepage.icon=https://upload.wikimedia.org/wikipedia/commons/8/85/Deluge-Logo.svg
       - homepage.href=http://hub.antcar:8112
 
   dozzle:
@@ -106,7 +106,7 @@ services:
     labels:
       - homepage.group=Observability
       - homepage.name=Dozzle
-      - homepage.icon=mdi-F1085
+      - homepage.icon=https://raw.githubusercontent.com/selfhosters/unRAID-CA-templates/master/templates/img/dozzle.png
       - homepage.href=http://hub.antcar:9999
 
   esphome:
@@ -126,7 +126,7 @@ services:
     labels:
       - 'homepage.group=Home Automation'
       - homepage.name=ESPHome
-      - homepage.icon=si-#000000
+      - homepage.icon=https://raw.githubusercontent.com/digiblur/unraid-docker-templates/master/images/esphome.png
       - homepage.href=http://hub.antcar:6052
 
   grafana:
@@ -145,7 +145,7 @@ services:
     labels:
       - homepage.group=Observability
       - homepage.name=Grafana
-      - homepage.icon=mdi-F1085
+      - homepage.icon=https://upload.wikimedia.org/wikipedia/commons/3/3b/Grafana_icon.svg
       - homepage.href=http://hub.antcar:3002
 
   homeassistant:
@@ -161,7 +161,7 @@ services:
     labels:
       - 'homepage.group=Home Automation'
       - 'homepage.name=Home Assistant'
-      - homepage.icon=si-#18BCF2
+      - homepage.icon=https://upload.wikimedia.org/wikipedia/en/4/49/Home_Assistant_logo_%282023%29.svg
       - homepage.href=https://ha.antcar.casa
 
   homeassistant-s3-backup:
@@ -188,6 +188,7 @@ services:
       - 3001:3000
     volumes:
       - homepage-config:/app/config
+      - /media:/media:ro
       - /var/run/docker.sock:/var/run/docker.sock 
     logging:
       driver: "json-file"
@@ -215,7 +216,7 @@ services:
     restart: 'unless-stopped'
     # Optional - alternative address used for autodiscovery
     environment:
-      - JELLYFIN_PublishedServerUrl=https://jellyfin.antcar.casa
+      - JELLYFIN_PublishedServerUrl=https://jf.antcar.casa
     # Optional - may be necessary for docker healthcheck to pass if running in host network mode
     extra_hosts:
       - 'host.docker.internal:host-gateway'
@@ -227,7 +228,7 @@ services:
     labels:
       - homepage.group=Media
       - homepage.name=Jellyfin
-      - homepage.icon=si-#00A4DC
+      - homepage.icon=https://raw.githubusercontent.com/jellyfin/jellyfin-ux/master/branding/SVG/icon-transparent.svg
       - homepage.href=http://hub.antcar:8096
 
   mosquitto:
@@ -273,7 +274,7 @@ services:
     labels:
       - homepage.group=Media
       - homepage.name=Navidrome
-      - homepage.icon=mdi-F075A
+      - homepage.icon=https://raw.githubusercontent.com/selfhosters/unRAID-CA-templates/master/templates/img/navidrome.png
       - homepage.href=https://music.antcar.casa
 
   nginx:
@@ -316,7 +317,7 @@ services:
     labels:
       - homepage.group=Observability
       - homepage.name=Prometheus
-      - homepage.icon=mdi-F075A
+      - homepage.icon=https://upload.wikimedia.org/wikipedia/commons/3/38/Prometheus_software_logo.svg
       - homepage.href=http://hub.antcar:9090
 
   prowlarr:
@@ -339,7 +340,7 @@ services:
     labels:
       - homepage.group=Media
       - homepage.name=Prowlarr
-      - homepage.icon=si-#CD792C
+      - homepage.icon=https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/prowlarr-logo.png
       - homepage.href=http://hub.antcar:9696
 
   redis:
@@ -390,8 +391,8 @@ services:
         max-size: "200k"
     labels:
       - homepage.group=Media
-      - homepage.name=sabNZBD
-      - homepage.icon=mdi-F1462
+      - homepage.name=SABnzbd
+      - homepage.icon=https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/sabnzbd-logo.png
       - homepage.href=http://192.168.1.4:8990
 
   samba:
@@ -447,7 +448,7 @@ services:
     labels:
       - homepage.group=Media
       - 'homepage.name=Sonarr (TV)'
-      - homepage.icon=si-#2596BE
+      - homepage.icon=https://raw.githubusercontent.com/binhex/docker-templates/master/binhex/images/sonarr-icon.png
       - homepage.href=http://hub.antcar:8989
 
   sonarr-anime:
@@ -472,7 +473,7 @@ services:
     labels:
       - homepage.group=Media
       - 'homepage.name=Sonarr (Anime)'
-      - homepage.icon=si-#2596BE
+      - homepage.icon=https://raw.githubusercontent.com/binhex/docker-templates/master/binhex/images/sonarr-icon.png
       - homepage.href=http://hub.antcar:8991
 
   speedtest:
@@ -496,7 +497,7 @@ services:
     labels:
       - homepage.group=Observability
       - homepage.name=Speedtest
-      - homepage.icon=si-#141526
+      - homepage.icon=https://cdn.worldvectorlogo.com/logos/speedtest.svg
       - homepage.href=http://hub.antcar:8765
     
   zigbee2mqtt:
@@ -520,7 +521,7 @@ services:
     labels:
       - 'homepage.group=Home Automation'
       - homepage.name=Zigbee2MQTT
-      - homepage.icon=si-#EB0443
+      - homepage.icon=https://raw.githubusercontent.com/Koenkk/zigbee2mqtt/dev/images/logo_vector.svg
       - homepage.href=http://hub.antcar:8080
         
   zwave-js-ui:
@@ -552,7 +553,7 @@ services:
     labels:
       - 'homepage.group=Home Automation'
       - homepage.name=ZWave-JS-UI
-      - homepage.icon=mdi-F0AEA
+      - homepage.icon=https://raw.githubusercontent.com/digiblur/unraid-docker-templates/master/images/zwave-js-ui.png
       - homepage.href=http://hub.antcar:8091
 
 networks:

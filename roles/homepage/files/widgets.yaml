@@ -5,8 +5,17 @@
 - resources:
     cpu: true
     memory: true
+
+- resources:
+    label: root
+    expanded: true
     disk: /
 
-- search:
-    provider: duckduckgo
-    target: _blank
+- resources:
+    label: media
+    expanded: true
+    disk: /media
+
+# - search:
+#     provider: duckduckgo
+#     target: _blank
