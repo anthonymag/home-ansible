@@ -2,7 +2,7 @@
   become: true
   ansible.builtin.synchronize:
     src: ../new-music/
-    dest: /root/music/
+    dest: /media/music/
     recursive: true
     delete: false
   notify: restart navidrome
