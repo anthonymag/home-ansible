@@ -231,6 +231,28 @@ services:
       - homepage.icon=https://raw.githubusercontent.com/jellyfin/jellyfin-ux/master/branding/SVG/icon-transparent.svg
       - homepage.href=http://hub.antcar:8096
 
+  jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    environment:
+        - LOG_LEVEL=debug
+        - TZ=Asia/Tashkent
+    ports:
+        - 5055:5055
+    volumes:
+        - jellyseerr-config:/app/config
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "200k"
+    labels:
+      - homepage.group=Media
+      - homepage.name=Jellyseerr
+      - homepage.icon=https://iconduck.com/icons/252954/jellyseerr
+      - homepage.href=http://hub.antcar:8096
+
   mosquitto:
     image: eclipse-mosquitto:latest
     restart: always
@@ -568,6 +590,8 @@ volumes:
   media:
   jellyfin-config:
   jellyfin-cache:
+  jellyseerr-config:
+    name: jellyseerr-config
   navidrome-data:
   prom-data:
     name: prom-data
