@@ -7,7 +7,7 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Etc/UTC
+      - TZ=America/New_York
     volumes:
       - bazarr-config:/config
       - /media/movies:/movies
@@ -68,7 +68,7 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Etc/UTC
+      - TZ=America/New_York
       - DELUGE_LOGLEVEL=info
     volumes:
       - deluge-config:/config
@@ -236,7 +236,7 @@ services:
     container_name: jellyseerr
     environment:
         - LOG_LEVEL=debug
-        - TZ=Asia/Tashkent
+        - TZ=America/New_York
     ports:
         - 5055:5055
     volumes:
@@ -250,7 +250,7 @@ services:
     labels:
       - homepage.group=Media
       - homepage.name=Jellyseerr
-      - homepage.icon=https://iconduck.com/icons/252954/jellyseerr
+      - homepage.icon=https://iconduck.com/icons/252954/jellyseerr#
       - homepage.href=http://hub.antcar:8096
 
   mosquitto:
@@ -348,7 +348,7 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Etc/UTC
+      - TZ=America/New_York
     volumes:
       - prowlarr-data:/config
     ports:
@@ -399,7 +399,7 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Etc/UTC
+      - TZ=America/New_York
     volumes:
       - sabnzbd-config:/config
       - /media/downloads:/downloads
@@ -454,7 +454,7 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Etc/UTC
+      - TZ=America/New_York
     volumes:
       - sonarr-data:/config
       - /media/tv:/media
@@ -479,7 +479,7 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Etc/UTC
+      - TZ=America/New_York
     volumes:
       - sonarr-anime-data:/config
       - /media/anime:/media
@@ -599,6 +599,15 @@ volumes:
     name: prowlarr-data
   sabnzbd-config:
     name: sabnzbd-config
+  services:
+    name: services
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /services
+      owner: ant
+      group: ant
   sonarr-data:
     name: sonarr-data
   sonarr-anime-data:
