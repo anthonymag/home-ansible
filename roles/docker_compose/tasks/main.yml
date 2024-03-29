@@ -2,6 +2,11 @@
   set_fact:
     bw_secrets: "{{ hostvars.localhost.bw_secrets }}"
 
+- name: Create services directory
+  file:
+    path: /services
+    state: directory
+
 - name: Set each secret as a variable
   set_fact:
     "{{ item.name }}": "{{ item.value }}"
@@ -16,7 +21,7 @@
   when: bw_secrets is defined
 
 - name: Run Docker Compose
-  command: docker compose up -d
+  command: docker compose up -d --remove-orphans
   args:
     chdir: /root/
   become: true

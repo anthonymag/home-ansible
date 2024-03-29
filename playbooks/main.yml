@@ -17,7 +17,7 @@
         BW_CLIENTSECRET: "{{ bitwarden_secret.BW_CLIENTSECRET }}"
       no_log: true
 
-    - name: Bitwaden unlock vault
+    - name: Bitwarden unlock vault
       shell: |
         bw unlock --passwordenv BW_PASSWORD --raw 2>/dev/null
       environment:
@@ -51,20 +51,25 @@
   roles:
     - { role: packages, tags: ["packages"] }
 
-- name: configure navidrome
-  hosts: hub
-  roles:
-    - { role: navidrome, tags: ["music"] }
-
 - name: Configure Homepage
   hosts: hub
   roles:
     - { role: homepage, tags: ["homepage"] }
 
+- name: configure navidrome
+  hosts: hub
+  roles:
+    - { role: navidrome, tags: ["music"] }
+
 - name: Configure Prometheus
   hosts: hub
   roles:
     - { role: prometheus, tags: ["prometheus"] }
+
+- name: Configure Jellyseerr
+  hosts: hub
+  roles:
+    - { role: jellyseerr, tags: ["jellyseerr"] }
 
 - name: Apply Docker Compose
   hosts: hub

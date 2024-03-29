@@ -1,7 +1,16 @@
+- name: Ensure dirs exist
+  file:
+    path: /services/homepage/{{ item }}
+    state: directory
+  become: true
+  with_items: 
+    - config
+    - icons
+
 - name: Template Homepage config files
   template:
     src: ../files/{{ item }}.yaml
-    dest: /var/lib/docker/volumes/root_homepage-config/_data/{{ item }}.yaml
+    dest: /services/homepage/config/{{ item }}.yaml
   become: true
   with_items: 
     - bookmarks

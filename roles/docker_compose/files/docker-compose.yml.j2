@@ -187,7 +187,8 @@ services:
     ports:
       - 3001:3000
     volumes:
-      - homepage-config:/app/config
+      - /services/homepage/config:/app/config
+      - /services/homepage/icons:/app/public/icons
       - /media:/media:ro
       - /var/run/docker.sock:/var/run/docker.sock 
     logging:
@@ -229,28 +230,6 @@ services:
       - homepage.group=Media
       - homepage.name=Jellyfin
       - homepage.icon=https://raw.githubusercontent.com/jellyfin/jellyfin-ux/master/branding/SVG/icon-transparent.svg
-      - homepage.href=http://hub.antcar:8096
-
-  jellyseerr:
-    image: fallenbagel/jellyseerr:latest
-    container_name: jellyseerr
-    environment:
-        - LOG_LEVEL=debug
-        - TZ=America/New_York
-    ports:
-        - 5055:5055
-    volumes:
-        - jellyseerr-config:/app/config
-    restart: unless-stopped
-    logging:
-      driver: "json-file"
-      options:
-        max-file: "10"
-        max-size: "200k"
-    labels:
-      - homepage.group=Media
-      - homepage.name=Jellyseerr
-      - homepage.icon=https://iconduck.com/icons/252954/jellyseerr#
       - homepage.href=http://hub.antcar:8096
 
   mosquitto:
@@ -590,8 +569,6 @@ volumes:
   media:
   jellyfin-config:
   jellyfin-cache:
-  jellyseerr-config:
-    name: jellyseerr-config
   navidrome-data:
   prom-data:
     name: prom-data
@@ -606,8 +583,6 @@ volumes:
       type: none
       o: bind
       device: /services
-      owner: ant
-      group: ant
   sonarr-data:
     name: sonarr-data
   sonarr-anime-data:
