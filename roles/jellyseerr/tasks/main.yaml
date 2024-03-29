@@ -35,7 +35,7 @@
       homepage.group: Media
       homepage.name: Jellyseerr
       homepage.icon: /icons/jellyseerr.svg
-      homepage.href: http://hub.antcar:5055
+      homepage.href: https://request.antcar.casa
   register: jellyseerr_container
 
 - name: Restart Homepage

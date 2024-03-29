@@ -66,6 +66,11 @@
   roles:
     - { role: prometheus, tags: ["prometheus"] }
 
+- name: Configure Radarr
+  hosts: hub
+  roles:
+    - { role: radarr, tags: ["radarr"] }
+
 - name: Configure Jellyseerr
   hosts: hub
   roles:

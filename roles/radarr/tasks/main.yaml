@@ -1,0 +1,47 @@
+- name: Create Radarr config directory
+  file:
+    path: /services/radarr/config
+    state: directory
+    recurse: true
+  become: true
+  register: radarr_config_dir
+
+- name: Copy Radarr icon
+  copy:
+    src: ../files/icon.svg
+    dest: /services/homepage/icons/radarr.svg
+    owner: ant
+    group: ant
+    mode: '0644'
+  become: true
+
+- name: Create Radarr container
+  docker_container:
+    name: radarr
+    image: lscr.io/linuxserver/radarr:latest
+    restart_policy: unless-stopped
+    ports:
+      - 7878:7878
+    env:
+      PUID: "1000"
+      PGID: "1000"
+      TZ: America/New_York
+    log_driver: json-file
+    log_options:
+      max-file: "10"
+      max-size: 200k
+    volumes:
+      - "{{ radarr_config_dir.path }}:/config"
+      - /media/movies:/media
+      - /media/downloads:/downloads
+    labels:
+      homepage.group: Media Backend
+      homepage.name: Radarr
+      homepage.icon: /icons/radarr.svg
+      homepage.href: http://hub.antcar:7878
+  register: radarr_container
+
+- name: Restart Homepage
+  shell: docker restart homepage
+  become: true
+  when: radarr_container is changed
