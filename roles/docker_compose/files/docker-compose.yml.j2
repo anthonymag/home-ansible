@@ -202,6 +202,11 @@ services:
     container_name: jellyfin
     user: root:root
     network_mode: 'host'
+    group_add:
+      - "109" # render group
+      - "44" # video group
+    devices:
+      - /dev/dri:/dev/dri
     volumes:
       - jellyfin-config:/config
       - jellyfin-cache:/cache
@@ -217,7 +222,7 @@ services:
     restart: 'unless-stopped'
     # Optional - alternative address used for autodiscovery
     environment:
-      - JELLYFIN_PublishedServerUrl=https://jf.antcar.casa
+      - JELLYFIN_PublishedServerUrl=https://jellyfin.antcar.casa
     # Optional - may be necessary for docker healthcheck to pass if running in host network mode
     extra_hosts:
       - 'host.docker.internal:host-gateway'
