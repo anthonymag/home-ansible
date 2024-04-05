@@ -2,6 +2,17 @@
 # # For configuration options and examples, please see:
 # # https://gethomepage.dev/latest/configs/services
 
+- Networking:
+    - pfSense:
+        href: https://pfsense.home.arpa
+        icon: https://www.itandgeneral.com/wp-content/uploads/2023/11/pfsense-logo-square.png
+    - Living Room WAP:
+        href: https://usopp01.antcar.casa
+        icon: https://static.tp-link.com/upload/image-line/EAP650_UN_1.0_large_20230821091901o.png
+    - Closet Switch:
+        href: https://nami01.antcar.casa
+        icon: https://static.tp-link.com/upload/image-line/SG2016P_UN_1.2_01_large_20240207020458g.jpg
+
 # - Media:
 #     - Jellyfin:
 #         href: https://jellyfin.antcar.casa

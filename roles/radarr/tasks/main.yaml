@@ -38,7 +38,7 @@
       homepage.group: Media Backend
       homepage.name: Radarr
       homepage.icon: /icons/radarr.svg
-      homepage.href: http://hub.antcar:7878
+      homepage.href: https://radarr.antcar.casa
   register: radarr_container
 
 - name: Restart Homepage
