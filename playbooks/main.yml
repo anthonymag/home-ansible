@@ -51,12 +51,6 @@
   roles:
     - { role: packages, tags: ["packages"] }
 
-- name: Configure NFS
-  hosts: hub
-  become: true
-  roles:
-    - { role: nfs, tags: ["nfs"] }
-
 - name: Configure Homepage
   hosts: hub
   roles:

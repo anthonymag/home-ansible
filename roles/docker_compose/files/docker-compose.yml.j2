@@ -190,6 +190,7 @@ services:
       - /services/homepage/config:/app/config
       - /services/homepage/icons:/app/public/icons
       - /media:/media:ro
+      - media:/nas:ro
       - /var/run/docker.sock:/var/run/docker.sock 
     logging:
       driver: "json-file"
@@ -217,7 +218,7 @@ services:
         source: /media/movies
         target: /media/movies
       - type: bind
-        source: /media/anime
+        source: /var/lib/docker/volumes/media/_data/anime
         target: /media/anime
     restart: 'unless-stopped'
     # Optional - alternative address used for autodiscovery
@@ -433,10 +434,30 @@ services:
          writeable = yes
          available = yes
          write list = {{ samba_username01 }}, {{ samba_username02 }}
+      SAMBA_VOLUME_CONFIG_drive: |
+        [drive]
+         path = /shares/drive
+         guest ok = no
+         browseable = yes
+         public = no
+         writeable = yes
+         available = yes
+         write list = {{ samba_username01 }}, {{ samba_username02 }}
+      SAMBA_VOLUME_CONFIG_drive2: |
+        [drive2]
+         path = /shares/drive2
+         guest ok = no
+         browseable = yes
+         public = no
+         writeable = yes
+         available = yes
+         write list = {{ samba_username01 }}, {{ samba_username02 }}
       SAMBA_CONF_LOG_LEVEL: 3
     volumes:
       - /media:/shares/media
       - /services:/shares/services
+      - /drive:/shares/drive
+      - /drive2:/shares/drive2
     ports:
       - 445:445
     cap_add:
@@ -586,9 +607,15 @@ volumes:
   grafana:
     name: grafana
   homepage-config:
-  media:
   jellyfin-config:
   jellyfin-cache:
+  media:
+    name: media
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=192.168.1.8,nolock,hard,rw
+      device: ":/mnt/main/media"
   navidrome-data:
   prom-data:
     name: prom-data

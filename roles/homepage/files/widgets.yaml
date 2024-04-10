@@ -16,6 +16,11 @@
     expanded: true
     disk: /media
 
+- resources:
+    label: nas
+    expanded: true
+    disk: /nas
+
 # - search:
 #     provider: duckduckgo
 #     target: _blank
