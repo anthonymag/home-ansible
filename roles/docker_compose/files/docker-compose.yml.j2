@@ -502,7 +502,7 @@ services:
       - TZ=America/New_York
     volumes:
       - sonarr-anime-data:/config
-      - /media/anime:/media
+      - /var/lib/docker/volumes/media/_data/anime:/media
       - /media/downloads:/downloads
     ports:
       - 8991:8989

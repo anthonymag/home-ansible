@@ -20,6 +20,12 @@
   become: true
   when: bw_secrets is defined
 
+- name: Pull new images
+  command: docker compose pull 
+  args:
+    chdir: /root/
+  become: true
+
 - name: Run Docker Compose
   command: docker compose up -d --remove-orphans
   args:
