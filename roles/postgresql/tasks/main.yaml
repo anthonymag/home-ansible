@@ -1,0 +1,32 @@
+- name: Set facts
+  set_fact:
+    bw_secrets: "{{ hostvars.localhost }}"
+
+- name: Create PostgreSQL config directory
+  file:
+    path: /services/postgres/config
+    state: directory
+    recurse: true
+  become: true
+  register: postgres_config_dir
+
+- name: Create PostgreSQL container
+  docker_container:
+    name: postgres
+    hostname: postgres
+    image: postgres:16-alpine
+    restart_policy: unless-stopped
+    ports:
+      - 5432:5432
+    env:
+      POSTGRES_PASSWORD: "{{ bw_secrets.postgres_db_password }}"
+      POSTGRES_USER: "{{ bw_secrets.postgres_db_user }}"
+    log_driver: json-file
+    log_options:
+      max-file: "10"
+      max-size: 200k
+    volumes:
+      - "{{ postgres_config_dir.path }}/pgdata:/var/lib/postgresql/data"
+      - "{{ postgres_config_dir.path }}/pginit:/docker-entrypoint-initdb.d"
+    labels:
+      com.centurylinklabs.watchtower.enable: "False"

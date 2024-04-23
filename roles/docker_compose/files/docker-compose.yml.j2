@@ -37,7 +37,7 @@ services:
     - /sys:/sys:ro
     - /var/lib/docker/:/var/lib/docker:ro
     depends_on:
-    - redis
+    - redis-cadvisor
     logging:
       driver: "json-file"
       options:
@@ -55,7 +55,7 @@ services:
     restart: unless-stopped
     command: tunnel run
     environment:
-      - TUNNEL_TOKEN={{ cloudflared_tunnel_token }}
+      - TUNNEL_TOKEN={{ bw_secrets.cloudflared_tunnel_token }}
     logging:
       driver: "json-file"
       options:
@@ -169,8 +169,8 @@ services:
     image: istepanov/backup-to-s3:latest
     restart: always
     environment:
-      - ACCESS_KEY={{ s3_backup_aws_access_key }}
-      - 'SECRET_KEY={{ s3_backup_aws_secret_key }}'
+      - ACCESS_KEY={{ bw_secrets.s3_backup_aws_access_key }}
+      - 'SECRET_KEY={{ bw_secrets.s3_backup_aws_secret_key }}'
       - S3_PATH=s3://anthonymag-backups/homeassistant/
       - 'CRON_SCHEDULE=0 4 * * *'
     volumes:
@@ -190,7 +190,7 @@ services:
       - /services/homepage/config:/app/config
       - /services/homepage/icons:/app/public/icons
       - /media:/media:ro
-      - media:/nas:ro
+      - /mnt/media:/nas:ro
       - /var/run/docker.sock:/var/run/docker.sock 
     logging:
       driver: "json-file"
@@ -212,13 +212,13 @@ services:
       - jellyfin-config:/config
       - jellyfin-cache:/cache
       - type: bind
-        source: /media/tv
+        source: /mnt/media/tv
         target: /media/tv
       - type: bind
         source: /media/movies
         target: /media/movies
       - type: bind
-        source: /var/lib/docker/volumes/media/_data/anime
+        source: /mnt/media/anime
         target: /media/anime
     restart: 'unless-stopped'
     # Optional - alternative address used for autodiscovery
@@ -355,9 +355,50 @@ services:
       - homepage.icon=https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/prowlarr-logo.png
       - homepage.href=https://prowlarr.antcar.casa
 
-  redis:
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+    volumes:
+      - /services/radarr/config:/config
+      - /mnt/media/movies:/media
+      - /media/downloads:/downloads
+    ports:
+      - 7878:7878
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "200k"
+    labels:
+      - 'homepage.group=Media Backend'
+      - 'homepage.name=Radarr'
+      - homepage.icon=/icons/radarr.svg
+      - homepage.href=https://radarr.antcar.casa
+
+  recyclarr:
+    image: ghcr.io/recyclarr/recyclarr
+    container_name: recyclarr
+    user: 1000:1000
+    volumes:
+      - /services/recyclarr/config:/config
+    environment:
+      - RECYCLARR_CREATE_CONFIG=true
+      - TZ=America/New_York
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "200k"
+
+  redis-cadvisor:
     image: redis:latest
-    container_name: redis
+    container_name: redis-cadvisor
     ports:
     - 6379:6379
     logging:
@@ -371,8 +412,8 @@ services:
     image: istepanov/backup-to-s3:latest
     restart: always
     environment:
-      - ACCESS_KEY={{ s3_backup_aws_access_key }}
-      - 'SECRET_KEY={{ s3_backup_aws_secret_key }}'
+      - ACCESS_KEY={{ bw_secrets.s3_backup_aws_access_key }}
+      - 'SECRET_KEY={{ bw_secrets.s3_backup_aws_secret_key }}'
       - S3_PATH=s3://anthonymag-backups/root/
       - 'CRON_SCHEDULE=0 5 * * *'
     volumes:
@@ -412,10 +453,10 @@ services:
     container_name: samba
     restart: unless-stopped
     environment:
-      ACCOUNT_{{ samba_username01 }}: {{ samba_password01 }}
-      ACCOUNT_{{ samba_username02 }}: {{ samba_password02 }}
-      UID_{{ samba_username01 }}: 102
-      UID_{{ samba_username02 }}: 101
+      ACCOUNT_{{ bw_secrets.samba_username01 }}: {{ bw_secrets.samba_password01 }}
+      ACCOUNT_{{ bw_secrets.samba_username02 }}: {{ bw_secrets.samba_password02 }}
+      UID_{{ bw_secrets.samba_username01 }}: 102
+      UID_{{ bw_secrets.samba_username02 }}: 101
       SAMBA_VOLUME_CONFIG_media: |
         [media]
          path = /shares/media
@@ -424,7 +465,7 @@ services:
          public = no
          writeable = yes
          available = yes
-         write list = {{ samba_username01 }}, {{ samba_username02 }}
+         write list = {{ bw_secrets.samba_username01 }}, {{ bw_secrets.samba_username02 }}
       SAMBA_VOLUME_CONFIG_services: |
         [services]
          path = /shares/services
@@ -433,7 +474,7 @@ services:
          public = no
          writeable = yes
          available = yes
-         write list = {{ samba_username01 }}, {{ samba_username02 }}
+         write list = {{ bw_secrets.samba_username01 }}, {{ bw_secrets.samba_username02 }}
       SAMBA_VOLUME_CONFIG_drive: |
         [drive]
          path = /shares/drive
@@ -442,7 +483,7 @@ services:
          public = no
          writeable = yes
          available = yes
-         write list = {{ samba_username01 }}, {{ samba_username02 }}
+         write list = {{ bw_secrets.samba_username01 }}, {{ bw_secrets.samba_username02 }}
       SAMBA_VOLUME_CONFIG_drive2: |
         [drive2]
          path = /shares/drive2
@@ -451,13 +492,23 @@ services:
          public = no
          writeable = yes
          available = yes
-         write list = {{ samba_username01 }}, {{ samba_username02 }}
+         write list = {{ bw_secrets.samba_username01 }}, {{ bw_secrets.samba_username02 }}
+      SAMBA_VOLUME_CONFIG_root: |
+        [root]
+         path = /shares/root
+         guest ok = no
+         browseable = yes
+         public = no
+         writeable = yes
+         available = yes
+         write list = anthony, caroll
       SAMBA_CONF_LOG_LEVEL: 3
     volumes:
       - /media:/shares/media
       - /services:/shares/services
       - /drive:/shares/drive
       - /drive2:/shares/drive2
+      - /root:/shares/root
     ports:
       - 445:445
     cap_add:
@@ -477,7 +528,7 @@ services:
       - TZ=America/New_York
     volumes:
       - sonarr-data:/config
-      - /media/tv:/media
+      - /mnt/media/tv:/media
       - /media/downloads:/downloads
     ports:
       - 8989:8989
@@ -502,7 +553,7 @@ services:
       - TZ=America/New_York
     volumes:
       - sonarr-anime-data:/config
-      - /var/lib/docker/volumes/media/_data/anime:/media
+      - /mnt/media/anime:/media
       - /media/downloads:/downloads
     ports:
       - 8991:8989
@@ -573,7 +624,7 @@ services:
     tty: true
     stop_signal: SIGINT
     environment:
-      - SESSION_SECRET={{ zwave_session_secret }}
+      - SESSION_SECRET={{ bw_secrets.zwave_session_secret }}
       - ZWAVEJS_EXTERNAL_CONFIG=/usr/src/app/store/.config-db
       - TZ=America/New_York
     networks:
@@ -600,6 +651,7 @@ services:
 
 networks:
   zwave:
+
 volumes:
   bazarr-config:
   deluge-config:
@@ -609,13 +661,6 @@ volumes:
   homepage-config:
   jellyfin-config:
   jellyfin-cache:
-  media:
-    name: media
-    driver: local
-    driver_opts:
-      type: nfs
-      o: addr=192.168.1.8,nolock,hard,rw
-      device: ":/mnt/main/media"
   navidrome-data:
   prom-data:
     name: prom-data

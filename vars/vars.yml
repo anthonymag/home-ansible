@@ -1,1 +1,25 @@
 aws_profile: ant
+default_user: ant
+
+nas_media_mount: /mnt/main/media
+nas_services_mount: /mnt/main/services
+time_zone: America/New_York
+
+media_services:
+  readarr:
+    image: lscr.io/linuxserver/readarr
+    version: develop
+    type: books
+    frontend:
+      port: 8787
+    ports:
+      - "8787:8787"
+      
+  # jellystat:
+  #   image: cyfershepard/jellystat
+  #   version: latest
+  #   frontend:
+  #     dns_name: jellystat.antcar.casa
+  #     port: 3002
+  #   ports:
+  #     - "3002:3000"

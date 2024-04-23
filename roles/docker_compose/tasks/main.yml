@@ -1,17 +1,11 @@
 - name: Set facts
   set_fact:
-    bw_secrets: "{{ hostvars.localhost.bw_secrets }}"
+    bw_secrets: "{{ hostvars.localhost }}"
 
 - name: Create services directory
   file:
     path: /services
     state: directory
-
-- name: Set each secret as a variable
-  set_fact:
-    "{{ item.name }}": "{{ item.value }}"
-  loop: "{{ bw_secrets }}"
-  no_log: true
 
 - name: Template the Docker Compose file
   template:

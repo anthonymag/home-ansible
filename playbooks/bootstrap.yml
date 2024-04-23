@@ -1,0 +1,19 @@
+- name: Update fstab and create mounts
+  hosts: hub
+  tasks:
+    - name: Mount NAS NFS volume
+      become: true
+      ansible.posix.mount:
+        src: 192.168.1.8:/mnt/main/media
+        path: /mnt/media
+        opts: nolock,hard,rw
+        state: mounted
+        fstype: nfs
+
+    - name: Mount USB HDD
+      become: true
+      ansible.posix.mount:
+        src: /dev/sdb1
+        path: /media
+        state: mounted
+        fstype: ntfs # TODO: reformat as ext4
