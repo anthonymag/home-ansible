@@ -1,0 +1,51 @@
+# First run needs password for SSH and sudo:
+# ansible-playbook playbooks/ubuntu_bootstrap.yml -k --ask-become-pass
+---
+- name: Configure Ubuntu server for user 'ant'
+  hosts: argobox
+  become: true
+  tasks:
+
+    - name: Enable passwordless sudo
+      lineinfile:
+        path: /etc/sudoers
+        state: present
+        regexp: '^ant'
+        line: 'ant ALL=(ALL) NOPASSWD: ALL'
+        validate: 'visudo -cf %s'
+
+    - name: Add public key to authorized_keys
+      authorized_key:
+        user: ant
+        state: present
+        key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+
+    - name: Config passwordless SSH
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^PasswordAuthentication'
+        line: 'PasswordAuthentication no'
+      notify:
+        - restart sshd
+
+    - name: Upgrade kernel
+      apt:
+        name: linux-image-6.5.0-28-generic
+        state: present
+        update_cache: yes
+        force_apt_get: yes
+
+    - name: Reboot after kernel upgrade
+      reboot:
+        msg: "Rebooting after kernel upgrade"
+        connect_timeout: 5
+        reboot_timeout: 600
+        pre_reboot_delay: 0
+        post_reboot_delay: 30
+        test_command: uptime
+
+  handlers:
+    - name: restart sshd
+      service:
+        name: ssh
+        state: restarted
