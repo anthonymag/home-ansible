@@ -272,7 +272,7 @@ services:
       - 'ND_UILOGINBACKGROUNDURL=aHR0cHM6Ly9mcmVlNGt3YWxscGFwZXJzLmNvbS91cGxvYWRzL29yaWdpbmFscy8yMDIwLzAyLzI1L3BlcnNvbmEtbmlnaHR0aW1lLXRva3lvLXdhbGxwYXBlcgo='
     volumes:
       - navidrome-data:/data
-      - /media/music:/music:ro
+      - /mnt/media/music:/music:ro
     logging:
       driver: "json-file"
       options:
