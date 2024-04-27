@@ -1,52 +1,31 @@
-- name: Create service config directory
-  with_items: "{{ media_services }}"
+# - name: debug vars
+#   debug:
+#     var: "{{ vars }}"
+
+- name: "Create config directory"
   file:
-    path: /services/{{ item }}/config
+    path: "/services/{{ item.name }}/config"
     state: directory
     recurse: true
   become: true
+  loop: "{{ media_services }}"
 
-- name: Copy service icon
-  with_items: "{{ media_services }}"
+- name: "Copy icon"
   copy:
-    src: ../files/{{ item }}.svg
-    dest: /services/homepage/icons/{{ item }}.svg
-    owner: {{ default_user }}
-    group: {{ default_user }}
+    src: "../files/{{ item.name }}.svg"
+    dest: "/services/homepage/icons/{{ item.name }}.svg"
+    owner: "{{ default_user_uid }}"
+    group: "{{ default_user_gid }}"
     mode: '0644'
   become: true
+  loop: "{{ media_services }}"
+  register: media_icon
 
-- name: Create service container
-  with_items: "{{ media_services }}"
-  docker_container:
-    name: {{ item }}
-    image: "{{ item.image }}:{{ item.version }}"
-    restart_policy: unless-stopped
-    ports: {{ item.ports }}
-    env:
-      PUID: "1000"
-      PGID: "1000"
-      TZ: {{ time_zone }}
-    log_driver: json-file
-    log_options:
-      max-file: "10"
-      max-size: 200k
-    volumes:
-      - "/services/{{ item }}/config:/config"
-      - /media/{{ item.type }}:/media
-      - /media/downloads:/downloads
-    labels:
-      homepage.group: Media Backend
-      homepage.name: {{ item | capitalize }}
-      homepage.icon: /icons/{{ item }}.svg
-      homepage.href: https://{{ item }}.antcar.casa
-  register: media_container
+# TODO: Create nginx proxy host
 
-# Create nginx proxy host
-
-# Create DNS record
+# TODO: Create DNS record
 
 - name: Restart Homepage
   shell: docker restart homepage
   become: true
-  when: media_container is changed
+  when: media_icon is changed

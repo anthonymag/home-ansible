@@ -12,7 +12,17 @@
     - Closet Switch:
         href: https://nami01.antcar.casa
         icon: https://static.tp-link.com/upload/image-line/SG2016P_UN_1.2_01_large_20240207020458g.jpg
+    - PiHole (Robin):
+        href: https://robin.antcar.casa/admin
+        icon: https://raw.githubusercontent.com/loganmarchione/homelab-svg-assets/main/assets/pihole.svg
+    - PiHole (Olvia):
+        href: https://olvia.antcar.casa/admin
+        icon: https://raw.githubusercontent.com/loganmarchione/homelab-svg-assets/main/assets/pihole.svg
 
+- Data:
+    - TrueNAS:
+        href: https://nas.antcar.casa
+        icon: https://raw.githubusercontent.com/loganmarchione/homelab-svg-assets/main/assets/truenas-scale.svg
 # - Media:
 #     - Jellyfin:
 #         href: https://jellyfin.antcar.casa

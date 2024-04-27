@@ -649,6 +649,33 @@ services:
       - homepage.icon=https://raw.githubusercontent.com/digiblur/unraid-docker-templates/master/images/zwave-js-ui.png
       - homepage.href=https://zwave.antcar.casa
 
+{% for service in media_services %}
+  {{ service.name }}:
+    image: {{ service.image }}:{{ service.version }}
+    container_name: {{ service.name }}
+    environment:
+      - PUID={{ default_user_uid }}
+      - PGID={{ default_user_gid }}
+      - TZ={{ time_zone }}
+    volumes:
+      - /services/{{ service.name }}/config:/config
+      - /mnt/media/{{ service.type }}:/media
+      - /media/downloads:/downloads
+    ports: {{ service.ports }}
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "200k"
+    labels:
+      - 'homepage.group=Media Backend'
+      - 'homepage.name={{ service.name | capitalize }}'
+      - homepage.icon=/icons/{{ service.name }}.svg
+      - homepage.href=https://{{ service.name }}.antcar.casa
+
+{% endfor %}
+
 networks:
   zwave:
 

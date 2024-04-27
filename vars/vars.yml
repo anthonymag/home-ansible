@@ -1,20 +1,38 @@
 aws_profile: ant
 default_user: ant
+default_user_uid: "1000"
+default_user_gid: "1000"
 
 nas_media_mount: /mnt/main/media
 nas_services_mount: /mnt/main/services
 time_zone: America/New_York
 
 media_services:
-  readarr:
+  - name: readarr
     image: lscr.io/linuxserver/readarr
     version: develop
     type: books
-    frontend:
-      port: 8787
     ports:
       - "8787:8787"
-      
+  - name: lidarr
+    image: lscr.io/linuxserver/lidarr
+    version: latest
+    type: music
+    ports:
+      - "8686:8686"
+  # radarr:
+  #   image: lscr.io/linuxserver/radarr
+  #   version: latest
+  #   type: movies
+  #   ports:
+  #     - "7878:7878"
+  # sonarr:
+  #   image: lscr.io/linuxserver/sonarr
+  #   version: latest
+  #   type: tv
+  #   ports:
+  #     - "8989:8989"
+
   # jellystat:
   #   image: cyfershepard/jellystat
   #   version: latest

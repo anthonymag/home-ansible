@@ -94,6 +94,13 @@
   roles:
     - { role: jellyseerr, tags: ["jellyseerr"] }
 
+- name: Configure Media Services
+  hosts: hub
+  vars_files:
+    - ../vars/vars.yml
+  roles:
+    - { role: media, tags: ["media"] }
+
 - name: Apply Docker Compose
   hosts: hub
   vars_files:
@@ -103,6 +110,7 @@
     - { role: docker_compose,
         tags: [
                 "docker_compose",
-                "radarr"
+                "radarr",
+                "media"
               ]
       }
