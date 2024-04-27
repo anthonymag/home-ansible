@@ -1,5 +1,5 @@
 - name: Retrieve secrets
-  hosts: localhost
+  hosts: network
   vars_files:
     - ../vars/vars.yml
   tasks:
@@ -38,12 +38,6 @@
         bw_secrets: "{{ (bw_output.stdout | from_json).fields }}"
       no_log: true
 
-    - name: Set each secret as a variable
-      set_fact:
-        "{{ item.name }}": "{{ item.value }}"
-      loop: "{{ bw_secrets }}"
-      no_log: true
-
     - name: Bitwarden logout
       shell: |
         bw logout 2>/dev/null
@@ -52,22 +46,16 @@
   - always
 
 - name: install packages
-  hosts: network
+  hosts: hub
   become: true
   roles:
     - { role: packages, tags: ["packages"] }
 
-- name: Configure PostgreSQL
+- name: Configure NFS
   hosts: hub
   become: true
   roles:
-    - { 
-        role: postgresql, 
-        tags: [
-          "postgres",
-          "jellystats"
-        ]
-      }
+    - { role: nfs, tags: ["nfs"] }
 
 - name: Configure Homepage
   hosts: hub
@@ -84,10 +72,10 @@
   roles:
     - { role: prometheus, tags: ["prometheus"] }
 
-# - name: Configure Radarr
-#   hosts: hub
-#   roles:
-#     - { role: radarr, tags: ["radarr"] }
+- name: Configure Radarr
+  hosts: hub
+  roles:
+    - { role: radarr, tags: ["radarr"] }
 
 - name: Configure Jellyseerr
   hosts: hub
@@ -96,13 +84,5 @@
 
 - name: Apply Docker Compose
   hosts: hub
-  vars_files:
-    - ../vars/vars.yml
   roles:
-    - { role: radarr, tags: ["radarr"] }
-    - { role: docker_compose,
-        tags: [
-                "docker_compose",
-                "radarr"
-              ]
-      }
+    - { role: docker_compose, tags: ["docker_compose"] }

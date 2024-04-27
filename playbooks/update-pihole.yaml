@@ -38,12 +38,6 @@
         bw_secrets: "{{ (bw_output.stdout | from_json).fields }}"
       no_log: true
 
-    - name: Set each secret as a variable
-      set_fact:
-        "{{ item.name }}": "{{ item.value }}"
-      loop: "{{ bw_secrets }}"
-      no_log: true
-
     - name: Bitwarden logout
       shell: |
         bw logout 2>/dev/null
@@ -51,58 +45,14 @@
   tags:
   - always
 
-- name: install packages
+- name: Update PiHole
   hosts: network
-  become: true
-  roles:
-    - { role: packages, tags: ["packages"] }
-
-- name: Configure PostgreSQL
-  hosts: hub
-  become: true
-  roles:
-    - { 
-        role: postgresql, 
-        tags: [
-          "postgres",
-          "jellystats"
-        ]
-      }
-
-- name: Configure Homepage
-  hosts: hub
-  roles:
-    - { role: homepage, tags: ["homepage"] }
-
-- name: configure navidrome
-  hosts: hub
-  roles:
-    - { role: navidrome, tags: ["music"] }
-
-- name: Configure Prometheus
-  hosts: hub
-  roles:
-    - { role: prometheus, tags: ["prometheus"] }
-
-# - name: Configure Radarr
-#   hosts: hub
-#   roles:
-#     - { role: radarr, tags: ["radarr"] }
-
-- name: Configure Jellyseerr
-  hosts: hub
-  roles:
-    - { role: jellyseerr, tags: ["jellyseerr"] }
-
-- name: Apply Docker Compose
-  hosts: hub
+  become: yes
+  serial: 1
   vars_files:
-    - ../vars/vars.yml
+    - ../vars/network.yaml
   roles:
-    - { role: radarr, tags: ["radarr"] }
-    - { role: docker_compose,
-        tags: [
-                "docker_compose",
-                "radarr"
-              ]
-      }
+    - stop_keepalived
+    - updates
+    - pihole
+    - start_keepalived

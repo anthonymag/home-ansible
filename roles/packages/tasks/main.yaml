@@ -1,0 +1,59 @@
+- name: Update and upgrade apt packages
+  apt:
+    update_cache: yes
+    upgrade: dist
+
+- name: install build-essential
+  apt:
+    name: build-essential
+
+# Top-like tool for container metrics
+- name: Download ctop binary
+  get_url:
+    url: https://github.com/bcicen/ctop/releases/download/v0.7.7/ctop-0.7.7-linux-amd64
+    dest: /usr/local/bin/ctop
+    mode: '0755'
+
+- name: Make ctop executable
+  file:
+    path: /usr/local/bin/ctop
+    mode: '0755'
+    state: file
+
+- name: Install required system packages
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - software-properties-common
+      - gnupg2
+    state: present
+
+- name: Add Docker’s official GPG key
+  ansible.builtin.apt_key:
+    url: https://download.docker.com/linux/raspbian/gpg
+    state: present
+
+- name: Add Docker repository
+  apt_repository:
+    repo: deb https://download.docker.com/linux/raspbian/ {{ ansible_distribution_release }} stable
+    state: present
+
+- name: Install Docker Engine
+  apt:
+    name: docker-ce
+    state: present
+    update_cache: yes
+
+- name: Make sure Docker is started and enabled on boot
+  systemd:
+    name: docker
+    enabled: yes
+    state: started
+
+- name: Add user to Docker group
+  user:
+    name: "{{ ansible_user }}"
+    groups: docker
+    append: yes
