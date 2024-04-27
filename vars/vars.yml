@@ -20,18 +20,18 @@ media_services:
     type: music
     ports:
       - "8686:8686"
+  - name: sonarr
+    image: lscr.io/linuxserver/sonarr
+    version: latest
+    type: tv
+    ports:
+      - "8989:8989"
   # radarr:
   #   image: lscr.io/linuxserver/radarr
   #   version: latest
   #   type: movies
   #   ports:
   #     - "7878:7878"
-  # sonarr:
-  #   image: lscr.io/linuxserver/sonarr
-  #   version: latest
-  #   type: tv
-  #   ports:
-  #     - "8989:8989"
 
   # jellystat:
   #   image: cyfershepard/jellystat

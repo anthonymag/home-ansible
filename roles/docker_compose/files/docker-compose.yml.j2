@@ -531,7 +531,7 @@ services:
       - /mnt/media/tv:/media
       - /media/downloads:/downloads
     ports:
-      - 8989:8989
+      - 8992:8989
     restart: unless-stopped
     logging:
       driver: "json-file"
@@ -542,7 +542,7 @@ services:
       - 'homepage.group=Media Backend'
       - 'homepage.name=Sonarr (TV)'
       - homepage.icon=https://raw.githubusercontent.com/binhex/docker-templates/master/binhex/images/sonarr-icon.png
-      - homepage.href=https://sonarr.antcar.casa
+      - homepage.href=https://tv.antcar.casa
 
   sonarr-anime:
     image: lscr.io/linuxserver/sonarr:latest
