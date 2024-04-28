@@ -1,0 +1,29 @@
+- name: Set secrets
+  set_fact:
+    bw_secrets: "{{ hostvars.localhost }}"
+
+- name: Create config directory
+  file:
+    path: /services/recyclarr/config
+    state: directory
+    recurse: true
+  become: true
+  register: recyclarr_config
+
+- name: Template Recyclarr config
+  template:
+    src: ../files/recyclarr.yml.j2
+    dest: "{{ recyclarr_config.path }}/recyclarr.yml"
+  become: true
+
+- name: Template Recyclarr secrets
+  template:
+    src: ../files/secrets.yml.j2
+    dest: "{{ recyclarr_config.path }}/secrets.yml"
+  become: true
+
+- name: Restart Recyclarr
+  become: true
+  ansible.builtin.shell: docker compose restart recyclarr
+  args:
+    chdir: /root/

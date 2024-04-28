@@ -1,4 +1,4 @@
-- name: Set facts
+- name: Set secrets
   set_fact:
     bw_secrets: "{{ hostvars.localhost }}"
 

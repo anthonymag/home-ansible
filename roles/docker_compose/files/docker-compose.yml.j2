@@ -383,12 +383,11 @@ services:
   recyclarr:
     image: ghcr.io/recyclarr/recyclarr
     container_name: recyclarr
-    user: 1000:1000
+    user: "{{ default_user_uid }}:{{ default_user_gid }}"
     volumes:
       - /services/recyclarr/config:/config
     environment:
-      - RECYCLARR_CREATE_CONFIG=true
-      - TZ=America/New_York
+      - TZ={{ time_zone }}
     restart: unless-stopped
     logging:
       driver: "json-file"

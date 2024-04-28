@@ -111,6 +111,8 @@
         tags: [
                 "docker_compose",
                 "radarr",
-                "media"
+                "media",
+                "recyclarr"
               ]
       }
+    - { role: recyclarr, tags: ["recyclarr"] }
