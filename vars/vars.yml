@@ -23,7 +23,7 @@ media_services:
   - name: sonarr
     image: lscr.io/linuxserver/sonarr
     version: latest
-    type: tv
+    type: tvshows
     ports:
       - "8989:8989"
   # radarr:

@@ -9,9 +9,9 @@ services:
       - PGID=1000
       - TZ=America/New_York
     volumes:
-      - bazarr-config:/config
-      - /media/movies:/movies
-      - /media/tv:/tv 
+      - /services/bazarr/config:/config
+      - /mnt/media/movies:/movies
+      - /mnt/media/tvshows:/tvshows
     ports:
       - 6767:6767
     restart: unless-stopped
@@ -212,14 +212,11 @@ services:
       - jellyfin-config:/config
       - jellyfin-cache:/cache
       - type: bind
-        source: /mnt/media/tv
-        target: /media/tv
-      - type: bind
         source: /media/movies
         target: /media/movies
       - type: bind
-        source: /mnt/media/anime
-        target: /media/anime
+        source: /mnt/media/tvshows
+        target: /media/tvshows
     restart: 'unless-stopped'
     # Optional - alternative address used for autodiscovery
     environment:
@@ -518,31 +515,6 @@ services:
         max-file: "10"
         max-size: "200k"
 
-  sonarr-tv:
-    image: lscr.io/linuxserver/sonarr:latest
-    container_name: sonarr-tv
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/New_York
-    volumes:
-      - sonarr-data:/config
-      - /mnt/media/tv:/media
-      - /media/downloads:/downloads
-    ports:
-      - 8992:8989
-    restart: unless-stopped
-    logging:
-      driver: "json-file"
-      options:
-        max-file: "10"
-        max-size: "200k"
-    labels:
-      - 'homepage.group=Media Backend'
-      - 'homepage.name=Sonarr (TV)'
-      - homepage.icon=https://raw.githubusercontent.com/binhex/docker-templates/master/binhex/images/sonarr-icon.png
-      - homepage.href=https://tv.antcar.casa
-
   sonarr-anime:
     image: lscr.io/linuxserver/sonarr:latest
     container_name: sonarr-anime
@@ -552,7 +524,7 @@ services:
       - TZ=America/New_York
     volumes:
       - sonarr-anime-data:/config
-      - /mnt/media/anime:/media
+      - /mnt/media/tvshows:/media
       - /media/downloads:/downloads
     ports:
       - 8991:8989
@@ -679,7 +651,6 @@ networks:
   zwave:
 
 volumes:
-  bazarr-config:
   deluge-config:
   esphome-config:
   grafana:
@@ -701,8 +672,6 @@ volumes:
       type: none
       o: bind
       device: /services
-  sonarr-data:
-    name: sonarr-data
   sonarr-anime-data:
     name: sonarr-anime-data
   speedtest-data:
