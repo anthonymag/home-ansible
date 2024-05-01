@@ -11,6 +11,7 @@
   loop: "{{ media_services }}"
 
 - name: "Copy icon"
+  when: item.icon is not defined
   copy:
     src: "../files/{{ item.name }}.svg"
     dest: "/services/homepage/icons/{{ item.name }}.svg"

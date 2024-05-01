@@ -26,12 +26,19 @@ media_services:
     type: tvshows
     ports:
       - "8989:8989"
-  # radarr:
-  #   image: lscr.io/linuxserver/radarr
-  #   version: latest
-  #   type: movies
-  #   ports:
-  #     - "7878:7878"
+  - name: mylar3
+    image: lscr.io/linuxserver/mylar3
+    version: latest
+    type: comics
+    ports:
+      - "8090:8090"
+    icon: https://github.com/mylar3/mylar3/raw/ca4a3736865db0f11ed150b3768665e983c4118b/data/images/mylarlogo.png
+  - name: radarr
+    image: lscr.io/linuxserver/radarr
+    version: latest
+    type: movies
+    ports:
+      - "7878:7878"
 
   # jellystat:
   #   image: cyfershepard/jellystat
