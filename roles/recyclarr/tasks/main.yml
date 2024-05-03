@@ -22,8 +22,5 @@
     dest: "{{ recyclarr_config.path }}/secrets.yml"
   become: true
 
-- name: Restart Recyclarr
-  become: true
-  ansible.builtin.shell: docker compose restart recyclarr
-  args:
-    chdir: /root/
+- name: Sync Recyclarr
+  ansible.builtin.shell: docker exec recyclarr recyclarr sync

@@ -234,7 +234,7 @@ services:
       - jellyfin-config:/config
       - jellyfin-cache:/cache
       - type: bind
-        source: /media/movies
+        source: /mnt/media/movies
         target: /media/movies
       - type: bind
         source: /mnt/media/tvshows
@@ -604,6 +604,9 @@ services:
       - /services/{{ service.name }}/config:/config
       - /mnt/media/{{ service.type }}:/media
       - /media/downloads:/downloads
+{% for content_type in service.content %}
+      - /mnt/media/{{ content_type }}:/{{ content_type }}
+{% endfor %}
     ports: {{ service.ports }}
     restart: unless-stopped
     logging:

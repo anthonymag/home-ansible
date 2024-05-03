@@ -12,24 +12,34 @@ media_services:
     image: lscr.io/linuxserver/readarr
     version: develop
     type: books
+    content:
+      - audiobooks
+      - books
     ports:
       - "8787:8787"
   - name: lidarr
     image: lscr.io/linuxserver/lidarr
     version: latest
     type: music
+    content: [music]
     ports:
       - "8686:8686"
   - name: sonarr
     image: lscr.io/linuxserver/sonarr
     version: latest
     type: tvshows
+    content: 
+      - tvshows
+      - anime
     ports:
       - "8989:8989"
   - name: mylar3
     image: lscr.io/linuxserver/mylar3
     version: latest
     type: comics
+    content: 
+      - comics
+      - manga
     ports:
       - "8090:8090"
     icon: https://github.com/mylar3/mylar3/raw/ca4a3736865db0f11ed150b3768665e983c4118b/data/images/mylarlogo.png
@@ -37,6 +47,8 @@ media_services:
     image: lscr.io/linuxserver/radarr
     version: latest
     type: movies
+    content:
+      - movies
     ports:
       - "7878:7878"
 
