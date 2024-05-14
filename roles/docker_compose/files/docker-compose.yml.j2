@@ -3,6 +3,8 @@ services:
 
   audiobookshelf:
     image: ghcr.io/advplyr/audiobookshelf:latest
+    container_name: audiobookshelf
+    restart: always
     ports:
       - 13378:80
     volumes:
@@ -21,7 +23,111 @@ services:
       - 'homepage.group=Media'
       - homepage.name=Audiobookshelf
       - homepage.icon=https://raw.githubusercontent.com/advplyr/audiobookshelf/master/client/static/icon.svg
-      - homepage.href=https://audiobooks.antcar.casa
+      - homepage.href={{ bw_secrets.abs_url }}
+
+  authentik-postgresql:
+    image: docker.io/library/postgres:12-alpine
+    container_name: authentik-postgresql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      start_period: 20s
+      interval: 30s
+      retries: 5
+      timeout: 5s
+    volumes:
+      - /services/authentik/postgresql/data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: {{ bw_secrets.authentik_psql_pass }}
+      POSTGRES_USER: {{ bw_secrets.authentik_psql_user }}
+      POSTGRES_DB: {{ bw_secrets.authentik_psql_db }}
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "200k"
+
+  authentik-redis:
+    image: docker.io/library/redis:alpine
+    container_name: authentik-redis
+    command: --save 60 1 --loglevel warning
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      start_period: 20s
+      interval: 30s
+      retries: 5
+      timeout: 3s
+    volumes:
+      - /services/authentik/redis/data:/data
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "200k"
+
+  authentik-server:
+    image: ghcr.io/goauthentik/server:2024.4.2
+    container_name: authentik-server
+    restart: unless-stopped
+    user: root
+    command: server
+    environment:
+      AUTHENTIK_REDIS__HOST: authentik-redis
+      AUTHENTIK_POSTGRESQL__HOST: authentik-postgresql
+      AUTHENTIK_POSTGRESQL__USER: {{ bw_secrets.authentik_psql_user }}
+      AUTHENTIK_POSTGRESQL__NAME: {{ bw_secrets.authentik_psql_db }}
+      AUTHENTIK_POSTGRESQL__PASSWORD: {{ bw_secrets.authentik_psql_pass }}
+      AUTHENTIK_SECRET_KEY: {{ bw_secrets.authentik_secret_key }}
+      AUTHENTIK_ERROR_REPORTING_ENABLED: "true"
+    volumes:
+      - /services/authentik/media:/media
+      - /services/authentik/custom-templates:/templates
+    ports:
+      - "9000:9000"
+      - "9443:9443"
+    depends_on:
+      - authentik-postgresql
+      - authentik-redis
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "200k"
+    labels:
+      - 'homepage.group=Data'
+      - homepage.name=Authentik
+      - homepage.icon=https://raw.githubusercontent.com/goauthentik/authentik/main/web/icons/icon.svg
+      - homepage.href={{ bw_secrets.authentik_url }}
+
+  authentik-worker:
+    image: ghcr.io/goauthentik/server:2024.4.2
+    container_name: authentik-worker
+    restart: unless-stopped
+    user: root
+    command: worker
+    environment:
+      AUTHENTIK_REDIS__HOST: authentik-redis
+      AUTHENTIK_POSTGRESQL__HOST: authentik-postgresql
+      AUTHENTIK_POSTGRESQL__USER: {{ bw_secrets.authentik_psql_user }}
+      AUTHENTIK_POSTGRESQL__NAME: {{ bw_secrets.authentik_psql_db }}
+      AUTHENTIK_POSTGRESQL__PASSWORD: {{ bw_secrets.authentik_psql_pass }}
+      AUTHENTIK_SECRET_KEY: {{ bw_secrets.authentik_secret_key }}
+      AUTHENTIK_ERROR_REPORTING_ENABLED: "true"
+    # user: root
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /services/authentik/media:/media
+      - /services/authentik/certs:/certs
+      - /services/authentik/custom-templates:/templates
+    depends_on:
+      - authentik-postgresql
+      - authentik-redis
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "200k"
 
   bazarr:
     image: lscr.io/linuxserver/bazarr:latest
@@ -51,6 +157,7 @@ services:
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:latest
     container_name: cadvisor
+    restart: always
     ports:
     - 8359:8080
     volumes:
@@ -206,6 +313,7 @@ services:
   homepage:
     image: ghcr.io/gethomepage/homepage:latest
     container_name: homepage
+    restart: always
     ports:
       - 3001:3000
     volumes:
@@ -392,6 +500,7 @@ services:
   redis-cadvisor:
     image: redis:latest
     container_name: redis-cadvisor
+    restart: always
     ports:
     - 6379:6379
     logging:
