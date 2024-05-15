@@ -178,18 +178,39 @@ services:
       - homepage.icon=https://netdata.cloud/img/cadvisor.png
       - homepage.href=https://cadvisor.antcar.casa
 
-  cloudflared:
-    container_name: cloudflared
-    image: cloudflare/cloudflared:1347-4c3417fedda9
-    restart: unless-stopped
-    command: tunnel run
+  calibre:
+    image: lscr.io/linuxserver/calibre:latest
+    container_name: calibre
+    security_opt:
+      - seccomp:unconfined
     environment:
-      - TUNNEL_TOKEN={{ bw_secrets.cloudflared_tunnel_token }}
-    logging:
-      driver: "json-file"
-      options:
-        max-file: "10"
-        max-size: "200k"
+      - PUID={{ default_user_uid }}
+      - PGID={{ default_user_gid }}
+      - TZ={{ time_zone }}
+    volumes:
+      - /services/calibre/config:/config
+      - /mnt/media/books:/books
+      - /media/downloads:/downloads
+    ports:
+      - 8008:8080
+      - 8081:8081
+    restart: unless-stopped
+  
+  calibre-web:
+    image: lscr.io/linuxserver/calibre-web:latest
+    container_name: calibre-web
+    environment:
+      - PUID={{ default_user_uid }}
+      - PGID={{ default_user_gid }}
+      - TZ={{ time_zone }}
+      - DOCKER_MODS=linuxserver/mods:universal-calibre
+      - OAUTHLIB_RELAX_TOKEN_SCOPE=1
+    volumes:
+      - /services/calibre-web/config:/config
+      - '/services/calibre/config/Calibre Library:/books'
+    ports:
+      - 8083:8083
+    restart: unless-stopped
 
   deluge:
     image: lscr.io/linuxserver/deluge:latest
@@ -620,30 +641,6 @@ services:
       options:
         max-file: "10"
         max-size: "200k"
-
-  speedtest:
-    container_name: speedtest
-    image: henrywhitaker3/speedtest-tracker:dev
-    ports:
-      - 8765:80
-    volumes:
-      - /root/speedtest-data:/config
-    environment:
-      - TZ={{ time_zone }}
-      - PGID=
-      - PUID=
-      - OOKLA_EULA_GDPR=true
-    logging:
-      driver: "json-file"
-      options:
-        max-file: "10"
-        max-size: "200k"
-    restart: unless-stopped
-    labels:
-      - homepage.group=Observability
-      - homepage.name=Speedtest
-      - homepage.icon=https://cdn.worldvectorlogo.com/logos/speedtest.svg
-      - homepage.href=https://speedtest.antcar.casa
 
   zigbee2mqtt:
     container_name: zigbee2mqtt
