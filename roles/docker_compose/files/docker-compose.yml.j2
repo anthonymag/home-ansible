@@ -190,6 +190,8 @@ services:
     volumes:
       - /services/calibre/config:/config
       - /mnt/media/books:/books
+      - /mnt/media/comics:/comics
+      - /mnt/media/manga:/manga
       - /media/downloads:/downloads
     ports:
       - 8008:8080
@@ -300,9 +302,9 @@ services:
 
   homeassistant:
     container_name: homeassistant
-    image: ghcr.io/home-assistant/home-assistant:2024.3
+    image: ghcr.io/home-assistant/home-assistant:2024.5
     volumes:
-      - /root/home-assistant-config:/config
+      - /services/homeassistant/config:/config
       - /etc/localtime:/etc/localtime:ro
       - /run/dbus:/run/dbus:ro
     restart: unless-stopped
@@ -324,7 +326,7 @@ services:
       - S3_PATH=s3://anthonymag-backups/homeassistant/
       - 'CRON_SCHEDULE=0 4 * * *'
     volumes:
-      - /root/home-assistant-config/backups:/data:ro
+      - /services/homeassistant/config/backups:/data:ro
     logging:
       driver: "json-file"
       options:
@@ -369,7 +371,6 @@ services:
         source: /mnt/media/tvshows
         target: /media/tvshows
     restart: 'unless-stopped'
-    # Optional - alternative address used for autodiscovery
     environment:
       - JELLYFIN_PublishedServerUrl={{ bw_secrets.jellyfin_url }}
     # Optional - may be necessary for docker healthcheck to pass if running in host network mode
@@ -395,9 +396,9 @@ services:
       - 1883:1883
       - 9001:9001
     volumes:
-      - /root/mosquitto/config:/mosquitto/config
-      - /root/mosquitto/data:/mosquitto/data
-      - /root/mosquitto/log:/mosquitto/log
+      - /services/mosquitto/config:/mosquitto/config
+      - /services/mosquitto/data:/mosquitto/data
+      - /services/mosquitto/log:/mosquitto/log
     logging:
       driver: "json-file"
       options:
@@ -753,6 +754,3 @@ volumes:
       type: none
       o: bind
       device: /services
-  speedtest-data:
-  zwave-config:
-    name: zwave-config
