@@ -455,6 +455,56 @@ services:
       - homepage.icon=https://nginxproxymanager.com/icon.png
       - homepage.href=https://nginx.antcar.casa
 
+  planka:
+    image: ghcr.io/plankanban/planka:latest
+    container_name: planka
+    restart: on-failure
+    volumes:
+      - /services/planka/user-avatars:/app/public/user-avatars
+      - /services/planka/project-background-images:/app/public/project-background-images
+      - /services/planka/attachments:/app/private/attachments
+    ports:
+      - 3003:1337
+    environment:
+      - BASE_URL=https://planka.antcar.casa
+      - DATABASE_URL=postgresql://{{ bw_secrets.planka_psql_user }}:{{ bw_secrets.planka_psql_pass }}@planka-postgresql/{{ bw_secrets.planka_psql_db }}
+      - SECRET_KEY={{ bw_secrets.planka_secret_key }}
+      - TOKEN_EXPIRES_IN=365
+      - DEFAULT_ADMIN_EMAIL={{ bw_secrets.planka_admin_email }}
+      - DEFAULT_ADMIN_PASSWORD={{ bw_secrets.planka_admin_password }}
+      - DEFAULT_ADMIN_NAME={{ bw_secrets.planka_admin_user | capitalize }}
+      - DEFAULT_ADMIN_USERNAME={{ bw_secrets.planka_admin_user }}
+    labels:
+      - homepage.group=Productivity
+      - homepage.name=Planka
+      - homepage.icon=/icons/planka.svg
+      - homepage.href=https://planka.antcar.casa
+    depends_on:
+      planka-postgresql:
+        condition: service_healthy
+
+  planka-postgresql:
+    image: postgres:14-alpine
+    container_name: planka-postgresql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      start_period: 20s
+      interval: 30s
+      retries: 5
+      timeout: 5s
+    volumes:
+      - /services/planka/postgresql/data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: {{ bw_secrets.planka_psql_pass }}
+      POSTGRES_USER: {{ bw_secrets.planka_psql_user }}
+      POSTGRES_DB: {{ bw_secrets.planka_psql_db }}
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "200k"
+
   prometheus:
     image: prom/prometheus
     container_name: prometheus
@@ -680,14 +730,12 @@ services:
     networks:
       - zwave
     devices:
-      # Do not use /dev/ttyUSBX serial devices, as those mappings can change over time.
-      # Instead, use the /dev/serial/by-id/X serial device for your Z-Wave stick.
       - '/dev/serial/by-id/usb-Silicon_Labs_Zooz_ZST10_700_Z-Wave_Stick_ccd9f8b4da60ec11907e3d7625bfaa52-if00-port0:/dev/zwave'
     volumes:
       - /services/zwave/config:/usr/src/app/store
     ports:
-      - '8091:8091' # port for web interface
-      - '3000:3000' # port for Z-Wave JS websocket server
+      - '8091:8091'
+      - '3000:3000'
     logging:
       driver: "json-file"
       options:
