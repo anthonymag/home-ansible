@@ -189,6 +189,7 @@ services:
       - TZ={{ time_zone }}
     volumes:
       - /services/calibre/config:/config
+      - /media/calibre_library:/library
       - /mnt/media/books:/books
       - /mnt/media/comics:/comics
       - /mnt/media/manga:/manga
@@ -197,7 +198,17 @@ services:
       - 8008:8080
       - 8081:8081
     restart: unless-stopped
-  
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "200k"
+    labels:
+      - homepage.group=Books
+      - homepage.name=Calibre
+      - homepage.icon=/icons/calibre.svg
+      - homepage.href=https://calibre.antcar.casa
+
   calibre-web:
     image: lscr.io/linuxserver/calibre-web:latest
     container_name: calibre-web
@@ -209,10 +220,21 @@ services:
       - OAUTHLIB_RELAX_TOKEN_SCOPE=1
     volumes:
       - /services/calibre-web/config:/config
-      - '/services/calibre/config/Calibre Library:/books'
+      - /media/calibre_library:/books
     ports:
       - 8083:8083
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "200k"
+    labels:
+      - homepage.group=Books
+      - 'homepage.name=Calbre Web'
+      - homepage.icon=/icons/calibreweb.svg
+      - homepage.href=https://books.antcar.casa
+
 
   deluge:
     image: lscr.io/linuxserver/deluge:latest
@@ -692,6 +714,67 @@ services:
       options:
         max-file: "10"
         max-size: "200k"
+
+  whoogle:
+    image: benbusby/whoogle-search:latest
+    container_name: whoogle
+    restart: unless-stopped
+    pids_limit: 50
+    mem_limit: 256mb
+    memswap_limit: 256mb
+    user: whoogle
+    security_opt:
+      - no-new-privileges
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /config/:size=10M,uid=927,gid=927,mode=1700
+      - /var/lib/tor/:size=15M,uid=927,gid=927,mode=1700
+      - /run/tor/:size=1M,uid=927,gid=927,mode=1700
+    ports:
+      - 5000:5000
+    environment:
+      - WHOOGLE_ALT_TW=farside.link/nitter
+      - WHOOGLE_ALT_YT=farside.link/invidious
+      - WHOOGLE_ALT_IG=farside.link/bibliogram/u
+      - WHOOGLE_ALT_RD=farside.link/libreddit
+      - WHOOGLE_ALT_MD=farside.link/scribe
+      - WHOOGLE_ALT_TL=farside.link/lingva
+      - WHOOGLE_ALT_IMG=farside.link/rimgo
+      - WHOOGLE_ALT_WIKI=farside.link/wikiless
+      - WHOOGLE_ALT_IMDB=farside.link/libremdb
+      - WHOOGLE_ALT_QUORA=farside.link/quetre
+      - HTTPS_ONLY=1
+
+      - WHOOGLE_CONFIG_NEAR=jacksonville
+      - WHOOGLE_CONFIG_COUNTRY=US
+      - WHOOGLE_CONFIG_LANGUAGE=lang_en
+      # See app/static/settings/languages.json for values
+      - WHOOGLE_CONFIG_SEARCH_LANGUAGE=lang_en
+      - WHOOGLE_CONFIG_DISABLE=0
+    #  - WHOOGLE_CONFIG_BLOCK=pinterest.com,whitehouse.gov
+      - WHOOGLE_CONFIG_THEME=system
+      - WHOOGLE_CONFIG_ALTS=1
+      - WHOOGLE_CONFIG_NEW_TAB=1
+      - WHOOGLE_CONFIG_VIEW_IMAGE=1
+      # Remove everything except basic result cards from all search queries
+      - WHOOGLE_MINIMAL=0
+      - WHOOGLE_RESULTS_PER_PAGE=10
+      - WHOOGLE_AUTOCOMPLETE=1
+      - EXPOSE_PORT=5000
+      - WHOOGLE_CONFIG_URL={{ bw_secrets.whoogle_url }}
+
+      # - WHOOGLE_CONFIG_STYLE=":root { /* LIGHT THEME COLORS */ --whoogle-background: #d8dee9; --whoogle-accent: #2e3440; --whoogle-text: #3B4252; --whoogle-contrast-text: #eceff4; --whoogle-secondary-text: #70757a; --whoogle-result-bg: #fff; --whoogle-result-title: #4c566a; --whoogle-result-url: #81a1c1; --whoogle-result-visited: #a3be8c; /* DARK THEME COLORS */ --whoogle-dark-background: #222; --whoogle-dark-accent: #685e79; --whoogle-dark-text: #fff; --whoogle-dark-contrast-text: #000; --whoogle-dark-secondary-text: #bbb; --whoogle-dark-result-bg: #000; --whoogle-dark-result-title: #1967d2; --whoogle-dark-result-url: #4b11a8; --whoogle-dark-result-visited: #bbbbff; }"
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "200k"
+    labels:
+      - homepage.group=Productivity
+      - homepage.name=Whoogle
+      - homepage.icon=/icons/search.svg
+      - homepage.href={{ bw_secrets.whoogle_url }}
 
   zigbee2mqtt:
     container_name: zigbee2mqtt
