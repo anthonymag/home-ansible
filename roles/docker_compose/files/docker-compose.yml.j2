@@ -376,7 +376,6 @@ services:
   jellyfin:
     image: jellyfin/jellyfin
     container_name: jellyfin
-    user: root:root
     network_mode: 'host'
     group_add:
       - "109" # render group
@@ -439,6 +438,7 @@ services:
       - ND_LOGLEVEL=info
       - ND_SESSIONTIMEOUT=730h # 1 month
       - ND_ENABLESHARING=true
+      - ND_ENABLECOVERANIMATION=false
       - 'ND_BASEURL={{ bw_secrets.navidrome_url }}'
       - 'ND_UILOGINBACKGROUNDURL=aHR0cHM6Ly9mcmVlNGt3YWxscGFwZXJzLmNvbS91cGxvYWRzL29yaWdpbmFscy8yMDIwLzAyLzI1L3BlcnNvbmEtbmlnaHR0aW1lLXRva3lvLXdhbGxwYXBlcgo='
     volumes:
