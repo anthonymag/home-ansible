@@ -408,6 +408,28 @@ services:
       - homepage.icon=https://raw.githubusercontent.com/jellyfin/jellyfin-ux/master/branding/SVG/icon-transparent.svg
       - homepage.href={{ bw_secrets.jellyfin_url }}
 
+  jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    restart: always
+    ports:
+      - 5055:5055
+    environment:
+      - LOG_LEVEL=debug
+      - TZ={{ time_zone }}
+    volumes:
+      - /services/jellyseerr/config:/app/config
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "200k"
+    labels:
+      - homepage.group=Media
+      - homepage.name=Jellyseerr
+      - homepage.icon=/icons/jellyseerr.svg
+      - homepage.href={{ bw_secrets.jellyseerr_url }}
+
   mosquitto:
     image: eclipse-mosquitto:latest
     restart: always
