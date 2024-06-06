@@ -84,16 +84,6 @@
   roles:
     - { role: prometheus, tags: ["prometheus"] }
 
-# - name: Configure Radarr
-#   hosts: hub
-#   roles:
-#     - { role: radarr, tags: ["radarr"] }
-
-- name: Configure Jellyseerr
-  hosts: hub
-  roles:
-    - { role: jellyseerr, tags: ["jellyseerr"] }
-
 - name: Configure Media Services
   hosts: hub
   vars_files:
@@ -110,7 +100,6 @@
     - { role: docker_compose,
         tags: [
                 "docker_compose",
-                "radarr",
                 "media",
                 "recyclarr"
               ]
