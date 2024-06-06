@@ -10,7 +10,7 @@
 - name: Template the Docker Compose file
   template:
     src: ../files/docker-compose.yml.j2
-    dest: /root/docker-compose.yml
+    dest: /services/docker-compose.yml
   become: true
   when: bw_secrets is defined
 
