@@ -140,6 +140,7 @@ services:
       - /services/bazarr/config:/config
       - /mnt/media/movies:/movies
       - /mnt/media/tvshows:/tvshows
+      - /mnt/media/anime:/anime
     ports:
       - 6767:6767
     restart: unless-stopped
@@ -391,6 +392,9 @@ services:
       - type: bind
         source: /mnt/media/tvshows
         target: /media/tvshows
+      - type: bind
+        source: /mnt/media/anime
+        target: /media/anime
     restart: 'unless-stopped'
     environment:
       - JELLYFIN_PublishedServerUrl={{ bw_secrets.jellyfin_url }}
@@ -642,30 +646,6 @@ services:
         max-file: "10"
         max-size: "200k"
 
-  sabnzbd:
-    image: lscr.io/linuxserver/sabnzbd:latest
-    container_name: sabnzbd
-    environment:
-      - PUID={{ default_user_uid }}
-      - PGID={{ default_user_gid }}
-      - TZ={{ time_zone }}
-    volumes:
-      - sabnzbd-config:/config
-      - /media/downloads:/downloads
-    ports:
-      - 8990:8080
-    restart: unless-stopped
-    logging:
-      driver: "json-file"
-      options:
-        max-file: "10"
-        max-size: "200k"
-    labels:
-      - 'homepage.group=Media Backend'
-      - homepage.name=SABnzbd
-      - homepage.icon=https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/sabnzbd-logo.png
-      - homepage.href=https://sabnzbd.antcar.casa
-
   samba:
     image: ghcr.io/servercontainers/samba:latest
     container_name: samba
@@ -862,7 +842,6 @@ services:
       - TZ={{ time_zone }}
     volumes:
       - /services/{{ service.name }}/config:/config
-      - /mnt/media/{{ service.type }}:/media
       - /media/downloads:/downloads
 {% for content_type in service.content %}
       - /mnt/media/{{ content_type }}:/{{ content_type }}
