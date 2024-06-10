@@ -12,6 +12,7 @@ media_services:
     image: lscr.io/linuxserver/readarr
     version: develop
     type: books
+    group: books
     content:
       - audiobooks
       - books
@@ -21,6 +22,7 @@ media_services:
     image: lscr.io/linuxserver/lidarr
     version: latest
     type: music
+    group: media
     content: [music]
     ports:
       - "8686:8686"
@@ -28,6 +30,7 @@ media_services:
     image: lscr.io/linuxserver/sonarr
     version: latest
     type: tvshows
+    group: media
     content: 
       - tvshows
       - anime
@@ -37,6 +40,7 @@ media_services:
     image: lscr.io/linuxserver/mylar3
     version: latest
     type: comics
+    group: books
     content: 
       - comics
       - manga
@@ -47,6 +51,7 @@ media_services:
     image: lscr.io/linuxserver/radarr
     version: latest
     type: movies
+    group: media
     content:
       - movies
     ports:
