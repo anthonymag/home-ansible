@@ -17,11 +17,11 @@
 - name: Pull new images
   command: docker compose pull 
   args:
-    chdir: /root/
+    chdir: /services/
   become: true
 
 - name: Run Docker Compose
   command: docker compose up -d --remove-orphans
   args:
-    chdir: /root/
+    chdir: /services/
   become: true
