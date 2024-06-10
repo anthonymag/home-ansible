@@ -20,7 +20,7 @@ services:
         max-file: "10"
         max-size: "200k"
     labels:
-      - 'homepage.group=Media'
+      - homepage.group=Books
       - homepage.name=Audiobookshelf
       - homepage.icon=https://raw.githubusercontent.com/advplyr/audiobookshelf/master/client/static/icon.svg
       - homepage.href={{ bw_secrets.abs_url }}
@@ -150,7 +150,7 @@ services:
         max-file: "10"
         max-size: "200k"
     labels:
-      - 'homepage.group=Media Backend'
+      - 'homepage.group=Media'
       - homepage.name=Bazarr
       - homepage.icon=https://raw.githubusercontent.com/morpheus65535/bazarr/master/frontend/public/images/logo64.png
       - homepage.href=https://bazarr.antcar.casa
@@ -194,7 +194,7 @@ services:
       - /mnt/media/books:/books
       - /mnt/media/comics:/comics
       - /mnt/media/manga:/manga
-      - /media/downloads:/downloads
+      - /mnt/media/downloads:/downloads
     ports:
       - 8008:8080
       - 8081:8081
@@ -236,35 +236,6 @@ services:
       - homepage.icon=/icons/calibreweb.svg
       - homepage.href=https://books.antcar.casa
 
-
-  deluge:
-    image: lscr.io/linuxserver/deluge:latest
-    container_name: deluge
-    environment:
-      - PUID={{ default_user_uid }}
-      - PGID={{ default_user_gid }}
-      - TZ={{ time_zone }}
-      - DELUGE_LOGLEVEL=info
-    volumes:
-      - deluge-config:/config
-      - /media/downloads:/downloads
-    ports:
-      - 8112:8112
-      - 6881:6881
-      - 6881:6881/udp
-      - 58846:58846 #optional
-    restart: unless-stopped
-    logging:
-      driver: "json-file"
-      options:
-        max-file: "10"
-        max-size: "200k"
-    labels:
-      - 'homepage.group=Media Backend'
-      - homepage.name=Deluge
-      - homepage.icon=https://upload.wikimedia.org/wikipedia/commons/8/85/Deluge-Logo.svg
-      - homepage.href=https://deluge.antcar.casa
-
   dozzle:
     container_name: dozzle
     image: amir20/dozzle:latest
@@ -288,7 +259,7 @@ services:
     image: esphome/esphome:latest
     container_name: esphome
     volumes:
-      - esphome-config:/config:rw
+      - /services/esphome/config:/config:rw
       # Use local time for logging timestamps
       - /etc/localtime:/etc/localtime:ro
     network_mode: host
@@ -311,7 +282,7 @@ services:
     ports:
      - '3002:3000'
     volumes:
-      - grafana:/var/live/grafana
+      - /services/grafana/config:/var/live/grafana
     logging:
       driver: "json-file"
       options:
@@ -384,8 +355,8 @@ services:
     devices:
       - /dev/dri:/dev/dri
     volumes:
-      - jellyfin-config:/config
-      - jellyfin-cache:/cache
+      - /services/jellyfin/config:/config
+      - /services/jellyfin/cache:/cache
       - type: bind
         source: /mnt/media/movies
         target: /media/movies
@@ -468,7 +439,7 @@ services:
       - 'ND_BASEURL={{ bw_secrets.navidrome_url }}'
       - 'ND_UILOGINBACKGROUNDURL=aHR0cHM6Ly9mcmVlNGt3YWxscGFwZXJzLmNvbS91cGxvYWRzL29yaWdpbmFscy8yMDIwLzAyLzI1L3BlcnNvbmEtbmlnaHR0aW1lLXRva3lvLXdhbGxwYXBlcgo='
     volumes:
-      - navidrome-data:/data
+      - /services/navidrome/data:/data
       - /mnt/media/music:/music:ro
     logging:
       driver: "json-file"
@@ -482,7 +453,7 @@ services:
       - homepage.href={{ bw_secrets.navidrome_url }}
 
   nginx:
-    image: 'jc21/nginx-proxy-manager:latest'
+    image: jc21/nginx-proxy-manager:github-pr-3121 # temp fix for broken certbot
     container_name: nginx
     restart: unless-stopped
     ports:
@@ -566,8 +537,8 @@ services:
     extra_hosts:
       - 'host.docker.internal:host-gateway'
     volumes:
-      - /var/lib/prometheus:/etc/prometheus
-      - prom-data:/prometheus
+      - /services/prometheus/config:/etc/prometheus
+      - /services/prometheus/data:/prometheus
     logging:
       driver: "json-file"
       options:
@@ -587,7 +558,7 @@ services:
       - PGID={{ default_user_gid }}
       - TZ={{ time_zone }}
     volumes:
-      - prowlarr-data:/config
+      - /services/prowlarr/config:/config
     ports:
       - 9696:9696
     restart: unless-stopped
@@ -597,7 +568,7 @@ services:
         max-file: "10"
         max-size: "200k"
     labels:
-      - 'homepage.group=Media Backend'
+      - 'homepage.group=Media'
       - homepage.name=Prowlarr
       - homepage.icon=https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/prowlarr-logo.png
       - homepage.href=https://prowlarr.antcar.casa
@@ -739,12 +710,10 @@ services:
       - WHOOGLE_ALT_TW=farside.link/nitter
       - WHOOGLE_ALT_YT=farside.link/invidious
       - WHOOGLE_ALT_IG=farside.link/bibliogram/u
-      - WHOOGLE_ALT_RD=farside.link/libreddit
       - WHOOGLE_ALT_MD=farside.link/scribe
       - WHOOGLE_ALT_TL=farside.link/lingva
       - WHOOGLE_ALT_IMG=farside.link/rimgo
       - WHOOGLE_ALT_WIKI=farside.link/wikiless
-      - WHOOGLE_ALT_IMDB=farside.link/libremdb
       - WHOOGLE_ALT_QUORA=farside.link/quetre
       - HTTPS_ONLY=1
 
@@ -842,7 +811,7 @@ services:
       - TZ={{ time_zone }}
     volumes:
       - /services/{{ service.name }}/config:/config
-      - /media/downloads:/downloads
+      - /mnt/media/downloads:/downloads
 {% for content_type in service.content %}
       - /mnt/media/{{ content_type }}:/{{ content_type }}
 {% endfor %}
@@ -854,7 +823,7 @@ services:
         max-file: "10"
         max-size: "200k"
     labels:
-      - 'homepage.group=Media Backend'
+      - homepage.group={{ service.group | capitalize }}
       - 'homepage.name={{ service.name | capitalize }}'
       - homepage.icon={% if service.icon is defined %}{{ service.icon }}{% else %}/icons/{{ service.name }}.svg{% endif %}{{''}}
       - homepage.href=https://{{ service.name }}.antcar.casa
@@ -865,20 +834,6 @@ networks:
   zwave:
 
 volumes:
-  deluge-config:
-  esphome-config:
-  grafana:
-    name: grafana
-  homepage-config:
-  jellyfin-config:
-  jellyfin-cache:
-  navidrome-data:
-  prom-data:
-    name: prom-data
-  prowlarr-data:
-    name: prowlarr-data
-  sabnzbd-config:
-    name: sabnzbd-config
   services:
     name: services
     driver: local
@@ -886,3 +841,17 @@ volumes:
       type: none
       o: bind
       device: /services
+# === DEPRECATED ===
+#  deluge-config:
+#  esphome-config:
+#  grafana:
+#    name: grafana
+#  jellyfin-config:
+#  jellyfin-cache:
+#  navidrome-data:
+#  prom-data:
+#    name: prom-data
+#  prowlarr-data:
+#    name: prowlarr-data
+#  sabnzbd-config:
+#    name: sabnzbd-config
