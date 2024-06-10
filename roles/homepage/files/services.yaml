@@ -23,6 +23,12 @@
     - TrueNAS:
         href: https://nas.antcar.casa
         icon: https://raw.githubusercontent.com/loganmarchione/homelab-svg-assets/main/assets/truenas-scale.svg
+    - SABnzbd:
+        href: https://sabnzbd.antcar.casa
+        icon: https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/sabnzbd-logo.png
+    - qBittorrent:
+        href: https://qbt.antcar.casa
+        icon: https://static-00.iconduck.com/assets.00/qbittorrent-icon-2048x2048-kbb7ayst.png
 # - Media:
 #     - Jellyfin:
 #         href: https://jellyfin.antcar.casa
