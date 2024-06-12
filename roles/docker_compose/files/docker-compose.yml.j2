@@ -453,7 +453,7 @@ services:
       - homepage.href={{ bw_secrets.navidrome_url }}
 
   nginx:
-    image: jc21/nginx-proxy-manager:github-pr-3121 # temp fix for broken certbot
+    image: jc21/nginx-proxy-manager:latest
     container_name: nginx
     restart: unless-stopped
     ports:
@@ -805,6 +805,7 @@ services:
   {{ service.name }}:
     image: {{ service.image }}:{{ service.version }}
     container_name: {{ service.name }}
+    user: "{{ default_user_uid }}:{{ default_user_gid }}"
     environment:
       - PUID={{ default_user_uid }}
       - PGID={{ default_user_gid }}
