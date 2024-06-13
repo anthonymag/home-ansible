@@ -35,10 +35,9 @@ sonarr:
               - WEBDL-2160p
               - WEBRip-2160p
           - name: HDTV-2160p
+          - name: Bluray-1080p Remux
+            enabled: false
           - name: Bluray-1080p
-            qualities:
-              - Bluray-1080p Remux
-              - Bluray-1080p
           - name: WEB 1080p
             qualities:
               - WEBDL-1080p
@@ -79,10 +78,9 @@ sonarr:
               - WEBRip-2160p
           - name: HDTV-2160p
             enabled: false
+          - name: Bluray-1080p Remux
+            enabled: false
           - name: Bluray-1080p
-            qualities:
-              - Bluray-1080p Remux
-              - Bluray-1080p
           - name: WEB 1080p
             qualities:
               - WEBDL-1080p
@@ -123,16 +121,14 @@ sonarr:
               - WEBRip-2160p
           - name: HDTV-2160p
             enabled: false
-          - name: Bluray-1080p
+          - name: Bluray-1080p Remux
             enabled: false
-            qualities:
-              - Bluray-1080p Remux
-              - Bluray-1080p
           - name: WEB 1080p
             qualities:
               - WEBDL-1080p
               - WEBRip-1080p
               - HDTV-1080p
+          - name: Bluray-1080p
           - name: Bluray-720p
           - name: WEB 720p
             qualities:
@@ -406,8 +402,15 @@ radarr:
         rename: true
         standard: default
 
-    quality_definition:
-      type: movie
+    # =============================================================== #
+    # Uncomment below to initially set, but comment back afterwards.  #
+    # This is because some quality definition minimums like           #
+    # 1080p Blu-Ray are too high for some anime movies, leading to    #
+    # Radarr passing on perfectly good grabs and failing or instead   #
+    # grabbing massive remux ones for simple stuff like Ghibli movies #
+    # =============================================================== #
+    # quality_definition:
+    #   type: movie
 
     quality_profiles:
       - name: Movies-4K
@@ -427,10 +430,9 @@ radarr:
               - WEBDL-2160p
               - WEBRip-2160p
           - name: HDTV-2160p
+          - name: Remux-1080p
+            enabled: false
           - name: Bluray-1080p
-            qualities:
-              - Remux-1080p
-              - Bluray-1080p
           - name: WEB 1080p
             qualities:
               - WEBDL-1080p
@@ -471,10 +473,9 @@ radarr:
               - WEBRip-2160p
           - name: HDTV-2160p
             enabled: false
+          - name: Remux-1080p
+            enabled: false
           - name: Bluray-1080p
-            qualities:
-              - Remux-1080p
-              - Bluray-1080p
           - name: WEB 1080p
             qualities:
               - WEBDL-1080p
@@ -520,10 +521,9 @@ radarr:
               - WEBDL-1080p
               - WEBRip-1080p
               - HDTV-1080p
+          - name: Remux-1080p
+            enabled: false
           - name: Bluray-1080p
-            qualities:
-              - Remux-1080p
-              - Bluray-1080p
           - name: Bluray-720p
           - name: WEB 720p
             qualities:
@@ -564,10 +564,9 @@ radarr:
               - WEBDL-1080p
               - WEBRip-1080p
               - HDTV-1080p
+          - name: Remux-1080p
+            enabled: false
           - name: Bluray-1080p
-            qualities:
-              - Remux-1080p
-              - Bluray-1080p
           - name: Bluray-720p
           - name: WEB 720p
             qualities:
