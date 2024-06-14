@@ -3,8 +3,8 @@ default_user: ant
 default_user_uid: "0"
 default_user_gid: "0"
 
-nas_media_mount: /mnt/main/media
-nas_services_mount: /mnt/main/services
+nas_media_mount: /mnt/media
+usb_hdd_mount: /media
 time_zone: America/New_York
 
 media_services:

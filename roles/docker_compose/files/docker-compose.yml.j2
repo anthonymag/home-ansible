@@ -8,8 +8,8 @@ services:
     ports:
       - 13378:80
     volumes:
-      - /mnt/media/audiobooks:/audiobooks
-      - /mnt/media/podcasts:/podcasts
+      - {{ nas_media_mount }}/audiobooks:/audiobooks
+      - {{ nas_media_mount }}/podcasts:/podcasts
       - /services/audiobookshelf/config:/config
       - /services/audiobookshelf/metadata:/metadata
     environment:
@@ -138,9 +138,9 @@ services:
       - TZ={{ time_zone }}
     volumes:
       - /services/bazarr/config:/config
-      - /mnt/media/movies:/movies
-      - /mnt/media/tvshows:/tvshows
-      - /mnt/media/anime:/anime
+      - {{ nas_media_mount }}/movies:/movies
+      - {{ nas_media_mount }}/tvshows:/tvshows
+      - {{ nas_media_mount }}/anime:/anime
     ports:
       - 6767:6767
     restart: unless-stopped
@@ -190,11 +190,11 @@ services:
       - TZ={{ time_zone }}
     volumes:
       - /services/calibre/config:/config
-      - /media/calibre_library:/library
-      - /mnt/media/books:/books
-      - /mnt/media/comics:/comics
-      - /mnt/media/manga:/manga
-      - /mnt/media/downloads:/downloads
+      - {{ usb_hdd_mount }}/calibre_library:/library
+      - {{ nas_media_mount }}/books:/books
+      - {{ nas_media_mount }}/comics:/comics
+      - {{ nas_media_mount }}/manga:/manga
+      - {{ nas_media_mount }}/downloads:/downloads
     ports:
       - 8008:8080
       - 8081:8081
@@ -221,7 +221,7 @@ services:
       - OAUTHLIB_RELAX_TOKEN_SCOPE=1
     volumes:
       - /services/calibre-web/config:/config
-      - /media/calibre_library:/books
+      - {{ usb_hdd_mount }}/calibre_library:/books
     ports:
       - 8083:8083
     restart: unless-stopped
@@ -336,8 +336,8 @@ services:
     volumes:
       - /services/homepage/config:/app/config
       - /services/homepage/icons:/app/public/icons
-      - /media:/media:ro
-      - /mnt/media:/nas:ro
+      - {{ usb_hdd_mount }}:/media:ro
+      - {{ nas_media_mount }}:/nas:ro
       - /var/run/docker.sock:/var/run/docker.sock 
     logging:
       driver: "json-file"
@@ -358,13 +358,13 @@ services:
       - /services/jellyfin/config:/config
       - /services/jellyfin/cache:/cache
       - type: bind
-        source: /mnt/media/movies
+        source: {{ nas_media_mount }}/movies
         target: /media/movies
       - type: bind
-        source: /mnt/media/tvshows
+        source: {{ nas_media_mount }}/tvshows
         target: /media/tvshows
       - type: bind
-        source: /mnt/media/anime
+        source: {{ nas_media_mount }}/anime
         target: /media/anime
     restart: 'unless-stopped'
     environment:
@@ -440,7 +440,7 @@ services:
       - 'ND_UILOGINBACKGROUNDURL=aHR0cHM6Ly9mcmVlNGt3YWxscGFwZXJzLmNvbS91cGxvYWRzL29yaWdpbmFscy8yMDIwLzAyLzI1L3BlcnNvbmEtbmlnaHR0aW1lLXRva3lvLXdhbGxwYXBlcgo='
     volumes:
       - /services/navidrome/data:/data
-      - /mnt/media/music:/music:ro
+      - {{ nas_media_mount }}/music:/music:ro
     logging:
       driver: "json-file"
       options:
@@ -673,7 +673,7 @@ services:
          write list = {{ bw_secrets.samba_username01 }}, {{ bw_secrets.samba_username02 }}
       SAMBA_CONF_LOG_LEVEL: 3
     volumes:
-      - /media:/shares/media
+      - {{ usb_hdd_mount }}:/shares/media
       - /services:/shares/services
       - /drive:/shares/drive
       - /drive2:/shares/drive2
@@ -747,6 +747,46 @@ services:
       - homepage.icon=/icons/search.svg
       - homepage.href={{ bw_secrets.whoogle_url }}
 
+  ytdlm:
+    container_name: ytdlm
+    image: tzahi12345/youtubedl-material:latest
+    restart: always
+    volumes:
+      - {{ nas_media_mount }}/tvshows:/tvshows
+      - {{ nas_media_mount }}/ytdlm/audio:/app/audio
+      - {{ nas_media_mount }}/ytdlm/subscriptions:/app/subscriptions
+      - {{ nas_media_mount }}/ytdlm/users:/app/users
+      - {{ nas_media_mount }}/ytdlm/video:/app/video
+      - /services/ytdlm/appdata:/app/appdata
+      - /scripts:/scripts
+    ports:
+      - 8998:17442
+    environment:
+      ytdl_mongodb_connection_string: 'mongodb://ytdlm-mongo-db:27017'
+      ytdl_use_local_db: 'false'
+      write_ytdl_config: 'true'
+    depends_on:
+        - ytdlm-mongo-db
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "200k"
+    labels:
+      - homepage.group=Media
+      - homepage.name=YoutubeDL-Material
+      - homepage.icon=https://raw.githubusercontent.com/Tzahi12345/YoutubeDL-Material/master/src/favicon.ico
+      - homepage.href=https://yt.antcar.casa
+
+  ytdlm-mongo-db:
+    image: mongo:4
+    logging:
+        driver: "none"
+    container_name: ytdlm-mongo-db
+    restart: always
+    volumes:
+        - /services/ytdlm/db/:/data/db
+
   zigbee2mqtt:
     container_name: zigbee2mqtt
     image: koenkk/zigbee2mqtt:latest
@@ -812,9 +852,9 @@ services:
       - TZ={{ time_zone }}
     volumes:
       - /services/{{ service.name }}/config:/config
-      - /mnt/media/downloads:/downloads
+      - {{ nas_media_mount }}/downloads:/downloads
 {% for content_type in service.content %}
-      - /mnt/media/{{ content_type }}:/{{ content_type }}
+      - {{ nas_media_mount }}/{{ content_type }}:/{{ content_type }}
 {% endfor %}
     ports: {{ service.ports }}
     restart: unless-stopped
