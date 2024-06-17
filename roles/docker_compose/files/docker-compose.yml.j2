@@ -415,7 +415,7 @@ services:
       POSTGRES_IP: jellystat-postgresql
       POSTGRES_PORT: 5432
       JWT_SECRET: "{{ bw_secrets.jellystat_jwt_key }}"
-      TZ: {{ time_zore }}
+      TZ: {{ time_zone }}
     volumes:
       - /services/jellystat/backup-data:/app/backend/backup-data
     ports:
