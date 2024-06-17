@@ -405,6 +405,34 @@ services:
       - homepage.icon=/icons/jellyseerr.svg
       - homepage.href={{ bw_secrets.jellyseerr_url }}
 
+  jellystat:
+    image: cyfershepard/jellystat:latest
+    container_name: jellystat
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: {{ bw_secrets.jellystat_psql_user }}
+      POSTGRES_PASSWORD: {{ bw_secrets.jellystat_psql_pass }}
+      POSTGRES_IP: jellystat-postgresql
+      POSTGRES_PORT: 5432
+      JWT_SECRET: "{{ bw_secrets.jellystat_jwt_key }}"
+      TZ: {{ time_zore }}
+    volumes:
+      - /services/jellystat/backup-data:/app/backend/backup-data
+    ports:
+      - "3004:3000"
+    depends_on:
+      - jellystat-postgresql
+ 
+  jellystat-postgresql:
+    image: postgres:15.2
+    container_name: jellystat-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: {{ bw_secrets.jellystat_psql_user }}
+      POSTGRES_PASSWORD: {{ bw_secrets.jellystat_psql_pass }}
+    volumes:
+      - /services/jellystat/postgresql:/var/lib/postgresql/data
+
   mosquitto:
     image: eclipse-mosquitto:latest
     restart: always
