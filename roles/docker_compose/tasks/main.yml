@@ -7,6 +7,19 @@
     path: /services
     state: directory
 
+- name: Create directories for services
+  file:
+    path: "/services/{{ item }}"
+    state: directory
+  with_items:
+    - janitorr/config
+
+- name: Template Janitorr config
+  template:
+    src: ../files/janitorr.yml.j2
+    dest: /services/janitorr/config/application.yml
+  when: bw_secrets is defined
+
 - name: Template the Docker Compose file
   template:
     src: ../files/docker-compose.yml.j2

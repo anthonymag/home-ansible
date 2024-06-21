@@ -296,7 +296,7 @@ services:
 
   homeassistant:
     container_name: homeassistant
-    image: ghcr.io/home-assistant/home-assistant:2024.5
+    image: ghcr.io/home-assistant/home-assistant:2024.6
     volumes:
       - /services/homeassistant/config:/config
       - /etc/localtime:/etc/localtime:ro
@@ -345,43 +345,15 @@ services:
         max-file: "10"
         max-size: "200k"
 
-  jellyfin:
-    image: jellyfin/jellyfin
-    container_name: jellyfin
-    network_mode: 'host'
-    group_add:
-      - "109" # render group
-      - "44" # video group
-    devices:
-      - /dev/dri:/dev/dri
+  janitorr:
+    container_name: janitorr
+    image: ghcr.io/schaka/janitorr:native
     volumes:
-      - /services/jellyfin/config:/config
-      - /services/jellyfin/cache:/cache
-      - type: bind
-        source: {{ nas_media_mount }}/movies
-        target: /media/movies
-      - type: bind
-        source: {{ nas_media_mount }}/tvshows
-        target: /media/tvshows
-      - type: bind
-        source: {{ nas_media_mount }}/anime
-        target: /media/anime
-    restart: 'unless-stopped'
-    environment:
-      - JELLYFIN_PublishedServerUrl={{ bw_secrets.jellyfin_url }}
-    # Optional - may be necessary for docker healthcheck to pass if running in host network mode
-    extra_hosts:
-      - 'host.docker.internal:host-gateway'
-    logging:
-      driver: "json-file"
-      options:
-        max-file: "10"
-        max-size: "200k"
-    labels:
-      - homepage.group=Media
-      - homepage.name=Jellyfin
-      - homepage.icon=https://raw.githubusercontent.com/jellyfin/jellyfin-ux/master/branding/SVG/icon-transparent.svg
-      - homepage.href={{ bw_secrets.jellyfin_url }}
+      - /services/janitorr/config/application.yml:/workspace/application.yml
+      - {{ nas_media_mount }}/movies:/movies
+      - {{ nas_media_mount }}/tvshows:/tvshows
+      - {{ nas_media_mount }}/anime:/anime
+      - {{ nas_media_mount }}/leaving-soon:/media/leaving-soon
 
   jellyseerr:
     image: fallenbagel/jellyseerr:latest
@@ -422,6 +394,16 @@ services:
       - "3004:3000"
     depends_on:
       - jellystat-postgresql
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "200k"
+    labels:
+      - homepage.group=Media
+      - homepage.name=Jellystat
+      - homepage.icon={{ bw_secrets.jellystat_url }}/assets/icon-b-512-2e5110d2.png
+      - homepage.href={{ bw_secrets.jellystat_url }}
  
   jellystat-postgresql:
     image: postgres:15.2
@@ -716,65 +698,6 @@ services:
         max-file: "10"
         max-size: "200k"
 
-  whoogle:
-    image: benbusby/whoogle-search:latest
-    container_name: whoogle
-    restart: unless-stopped
-    pids_limit: 50
-    mem_limit: 256mb
-    memswap_limit: 256mb
-    user: whoogle
-    security_opt:
-      - no-new-privileges
-    cap_drop:
-      - ALL
-    tmpfs:
-      - /config/:size=10M,uid=927,gid=927,mode=1700
-      - /var/lib/tor/:size=15M,uid=927,gid=927,mode=1700
-      - /run/tor/:size=1M,uid=927,gid=927,mode=1700
-    ports:
-      - 5000:5000
-    environment:
-      - WHOOGLE_ALT_TW=farside.link/nitter
-      - WHOOGLE_ALT_YT=farside.link/invidious
-      - WHOOGLE_ALT_IG=farside.link/bibliogram/u
-      - WHOOGLE_ALT_MD=farside.link/scribe
-      - WHOOGLE_ALT_TL=farside.link/lingva
-      - WHOOGLE_ALT_IMG=farside.link/rimgo
-      - WHOOGLE_ALT_WIKI=farside.link/wikiless
-      - WHOOGLE_ALT_QUORA=farside.link/quetre
-      - HTTPS_ONLY=1
-
-      - WHOOGLE_CONFIG_NEAR=jacksonville
-      - WHOOGLE_CONFIG_COUNTRY=US
-      - WHOOGLE_CONFIG_LANGUAGE=lang_en
-      # See app/static/settings/languages.json for values
-      - WHOOGLE_CONFIG_SEARCH_LANGUAGE=lang_en
-      - WHOOGLE_CONFIG_DISABLE=0
-    #  - WHOOGLE_CONFIG_BLOCK=pinterest.com,whitehouse.gov
-      - WHOOGLE_CONFIG_THEME=system
-      - WHOOGLE_CONFIG_ALTS=1
-      - WHOOGLE_CONFIG_NEW_TAB=1
-      - WHOOGLE_CONFIG_VIEW_IMAGE=1
-      # Remove everything except basic result cards from all search queries
-      - WHOOGLE_MINIMAL=0
-      - WHOOGLE_RESULTS_PER_PAGE=10
-      - WHOOGLE_AUTOCOMPLETE=1
-      - EXPOSE_PORT=5000
-      - WHOOGLE_CONFIG_URL={{ bw_secrets.whoogle_url }}
-
-      # - WHOOGLE_CONFIG_STYLE=":root { /* LIGHT THEME COLORS */ --whoogle-background: #d8dee9; --whoogle-accent: #2e3440; --whoogle-text: #3B4252; --whoogle-contrast-text: #eceff4; --whoogle-secondary-text: #70757a; --whoogle-result-bg: #fff; --whoogle-result-title: #4c566a; --whoogle-result-url: #81a1c1; --whoogle-result-visited: #a3be8c; /* DARK THEME COLORS */ --whoogle-dark-background: #222; --whoogle-dark-accent: #685e79; --whoogle-dark-text: #fff; --whoogle-dark-contrast-text: #000; --whoogle-dark-secondary-text: #bbb; --whoogle-dark-result-bg: #000; --whoogle-dark-result-title: #1967d2; --whoogle-dark-result-url: #4b11a8; --whoogle-dark-result-visited: #bbbbff; }"
-    logging:
-      driver: "json-file"
-      options:
-        max-file: "10"
-        max-size: "200k"
-    labels:
-      - homepage.group=Productivity
-      - homepage.name=Whoogle
-      - homepage.icon=/icons/search.svg
-      - homepage.href={{ bw_secrets.whoogle_url }}
-
   ytdlm:
     container_name: ytdlm
     image: tzahi12345/youtubedl-material:latest
@@ -910,17 +833,4 @@ volumes:
       type: none
       o: bind
       device: /services
-# === DEPRECATED ===
-#  deluge-config:
-#  esphome-config:
-#  grafana:
-#    name: grafana
-#  jellyfin-config:
-#  jellyfin-cache:
-#  navidrome-data:
-#  prom-data:
-#    name: prom-data
-#  prowlarr-data:
-#    name: prowlarr-data
-#  sabnzbd-config:
-#    name: sabnzbd-config
+
