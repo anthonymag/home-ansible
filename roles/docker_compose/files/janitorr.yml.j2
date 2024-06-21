@@ -1,0 +1,88 @@
+logging:
+  level:
+    com.github.schaka: INFO
+
+server:
+  port: 8978
+
+# File system access (same mapping as Sonarr, Radarr and Jellyfin) is required to delete TV shows by season and create "Leaving Soon" collections in Jellyfin
+# Currently, Jellyfin does not support an easy way to add only a few seasons or movies to a collection, we need access to temporary symlinks
+# Additionally, checks to prevent deletion on currently still seeding media currently require file system access as well
+file-system:
+  access: true
+  validate-seeding: true # validates seeding by checking if the original file exists and skips deletion - turning this off will send a delete to the *arrs even if a torrent may still be active
+  leaving-soon-dir: "/media/leaving-soon" # A directory this container can write to and Jellyfin can find under the same path - this will contain new folders with symlinks to files for Jellyfin's "Leaving Soon" collections
+  from-scratch: true # Clean up entire "Leaving Soon" directory and rebuild from scratch - this can help with clearing orphaned data - turning this off can save resources (less writes to drive)
+  free-space-check-dir: "/media/leaving-soon" # This is the default directory Janitorr uses to check how much space is left on your drives. By default, it checks the entire root - you may point it at a specific folder
+
+application:
+  dry-run: true # set to false once ready to really use this
+  whole-tv-show: true # activating this will treat as a whole show as recently download/watched from a single episode, rather than that episode's season - shows will be deleted as a whole
+  whole-show-seeding-check: false # Turning this off, disables the seeding check entirely if whole-tv-show is enabled. Activating this check will keep a whole TV show if any season is still seeding (requires file access).
+  leaving-soon: 14d # 14 days before a movie is deleted, it gets added to a "Leaving Soon" type collection (i.e. movies that are 76 to 89 days old)
+  exclusion-tag: "protected" # Set this tag to your movies or TV shows in the *arrs to exclude media from being cleaned up
+
+  media-deletion:
+    enabled: true
+    movie-expiration:
+      # Percentage of free disk space to expiration time - if the highest given number is not reached, nothing will be deleted
+      # If filesystem access is not given, disk percentage can't be determined. As a result, Janitorr will always choose the largest expiration time.
+      5: 15d # 15 days
+      10: 30d # 1 month - if a movie's files on your system are older than this, they will be deleted
+      15: 30d # 2 months
+      20: 90d # 3 months
+    season-expiration:
+      5: 15d # 15 days
+      10: 20d # 20 days - if a season's files on your system are older than this, they will be deleted
+      15: 60d # 2 months
+      20: 120d # 4 months
+
+  tag-based-deletion:
+    enabled: true
+    minimum-free-disk-percent: 100
+    schedules:
+      - tag: delete-soon
+        expiration: 7d
+      - tag: delete-now
+        expiration: 1d
+
+clients:
+  sonarr:
+    enabled: true
+    url: "{{ bw_secrets.sonarr_internal_url }}"
+    api-key: "{{ bw_secrets.sonarr_apikey }}"
+    delete-empty-shows: true # If a show that was "touched" by Janitorr contains no files and has no monitored seasons at all, it will get deleted as part of orphan cleanup
+  radarr:
+    enabled: true
+    url: "{{ bw_secrets.radarr_internal_url }}"
+    api-key: "{{ bw_secrets.radarr_apikey }}"
+
+  ## You can only choose one out of Jellyfin or Emby.
+  ## User login is only needed if deletion is enabled.
+  jellyfin:
+    enabled: true
+    url: "{{ bw_secrets.jellyfin_internal_url }}"
+    api-key: "{{ bw_secrets.jellyfin_janitorr_api_key }}"
+    username: "{{ bw_secrets.jellyfin_janitorr_username }}"
+    password: "{{ bw_secrets.jellyfin_janitorr_password }}"
+    delete: true # Jellyfin setup is required for JellyStat. However, if you don't want Janitorr to send delete requests to the Jellyfin API, disable it here
+
+  ## You can only choose one out of Jellyfin or Emby. Emby support is secondary.
+  ## User login is only needed if deletion is enabled.
+  emby:
+    enabled: false
+    url: ""
+    api-key: ""
+    username: ""
+    password: ""
+    delete: true # Emby setup is required for JellyStat. However, if you don't want Janitorr to send delete requests to the Emby API, disable it here
+  jellyseerr:
+    enabled: true
+    url: "{{ bw_secrets.jellyseerr_internal_url }}"
+    api-key: "{{ bw_secrets.jellyseerr_api_key }}"
+    match-server: false # Enable if you have several Radarr/Sonarr instances set up in Jellyseerr. Janitorr will match them by the host+port supplied in their respective config settings.
+  jellystat:
+    enabled: true
+    whole-tv-show: true # Enabling this will make Jellystat consider TV shows as a whole if any episode of any season has been watched
+    url: "{{ bw_secrets.jellystat_internal_url }}"
+    api-key: "{{ bw_secrets.jellystat_janitorr_api_key }}"
