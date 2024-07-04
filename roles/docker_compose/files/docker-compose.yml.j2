@@ -80,6 +80,7 @@ services:
       AUTHENTIK_POSTGRESQL__PASSWORD: {{ bw_secrets.authentik_psql_pass }}
       AUTHENTIK_SECRET_KEY: {{ bw_secrets.authentik_secret_key }}
       AUTHENTIK_ERROR_REPORTING_ENABLED: "true"
+      AUTHENTIK_INSECURE: "true"
     volumes:
       - /services/authentik/media:/media
       - /services/authentik/custom-templates:/templates
@@ -114,6 +115,7 @@ services:
       AUTHENTIK_POSTGRESQL__PASSWORD: {{ bw_secrets.authentik_psql_pass }}
       AUTHENTIK_SECRET_KEY: {{ bw_secrets.authentik_secret_key }}
       AUTHENTIK_ERROR_REPORTING_ENABLED: "true"
+      AUTHENTIK_BOOTSTRAP_PASSWORD: {{ bw_secrets.authentik_bootstrap_password }}
     # user: root
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -654,40 +656,9 @@ services:
          writeable = yes
          available = yes
          write list = {{ bw_secrets.samba_username01 }}, {{ bw_secrets.samba_username02 }}
-      SAMBA_VOLUME_CONFIG_drive: |
-        [drive]
-         path = /shares/drive
-         guest ok = no
-         browseable = yes
-         public = no
-         writeable = yes
-         available = yes
-         write list = {{ bw_secrets.samba_username01 }}, {{ bw_secrets.samba_username02 }}
-      SAMBA_VOLUME_CONFIG_drive2: |
-        [drive2]
-         path = /shares/drive2
-         guest ok = no
-         browseable = yes
-         public = no
-         writeable = yes
-         available = yes
-         write list = {{ bw_secrets.samba_username01 }}, {{ bw_secrets.samba_username02 }}
-      SAMBA_VOLUME_CONFIG_root: |
-        [root]
-         path = /shares/root
-         guest ok = no
-         browseable = yes
-         public = no
-         writeable = yes
-         available = yes
-         write list = {{ bw_secrets.samba_username01 }}, {{ bw_secrets.samba_username02 }}
-      SAMBA_CONF_LOG_LEVEL: 3
     volumes:
       - {{ usb_hdd_mount }}:/shares/media
       - /services:/shares/services
-      - /drive:/shares/drive
-      - /drive2:/shares/drive2
-      - /root:/shares/root
     ports:
       - 445:445
     cap_add:
@@ -833,4 +804,3 @@ volumes:
       type: none
       o: bind
       device: /services
-
