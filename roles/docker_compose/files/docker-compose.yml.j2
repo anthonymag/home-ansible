@@ -67,7 +67,7 @@ services:
         max-size: "200k"
 
   authentik-server:
-    image: ghcr.io/goauthentik/server:2024.4.2
+    image: ghcr.io/goauthentik/server:latest
     container_name: authentik-server
     restart: unless-stopped
     user: root
@@ -102,7 +102,7 @@ services:
       - homepage.href={{ bw_secrets.authentik_url }}
 
   authentik-worker:
-    image: ghcr.io/goauthentik/server:2024.4.2
+    image: ghcr.io/goauthentik/server:latest
     container_name: authentik-worker
     restart: unless-stopped
     user: root
@@ -190,6 +190,7 @@ services:
       - PUID={{ default_user_uid }}
       - PGID={{ default_user_gid }}
       - TZ={{ time_zone }}
+      - "CALIBRE_OVERRIDE_DATABASE_PATH=/config/metadata.db"
     volumes:
       - /services/calibre/config:/config
       - {{ usb_hdd_mount }}/calibre_library:/library
@@ -449,7 +450,7 @@ services:
       - ND_ENABLESHARING=true
       - ND_ENABLECOVERANIMATION=false
       - 'ND_BASEURL={{ bw_secrets.navidrome_url }}'
-      - 'ND_UILOGINBACKGROUNDURL=aHR0cHM6Ly9mcmVlNGt3YWxscGFwZXJzLmNvbS91cGxvYWRzL29yaWdpbmFscy8yMDIwLzAyLzI1L3BlcnNvbmEtbmlnaHR0aW1lLXRva3lvLXdhbGxwYXBlcgo='
+      - ND_UILOGINBACKGROUNDURL=https://hipstergearlab.com/wp-content/uploads/2019/09/luana-de-marco-PF1l1F1hzoU-unsplash.jpg?ezimgfmt=ng%3Awebp%2Fngcb1%2Frs%3Adevice%2Frscb1-1
     volumes:
       - /services/navidrome/data:/data
       - {{ nas_media_mount }}/music:/music:ro
@@ -620,7 +621,7 @@ services:
       - ACCESS_KEY={{ bw_secrets.s3_backup_aws_access_key }}
       - 'SECRET_KEY={{ bw_secrets.s3_backup_aws_secret_key }}'
       - S3_PATH=s3://anthonymag-backups/root/
-      - 'CRON_SCHEDULE=0 5 * * *'
+      - 'CRON_SCHEDULE=0 5 * * 6'
     volumes:
       - /root-backups:/data:ro
     logging:
@@ -663,6 +664,21 @@ services:
       - 445:445
     cap_add:
       - CAP_NET_ADMIN
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "200k"
+
+  unpackerr:
+    image: golift/unpackerr:latest
+    container_name: unpackerr
+    volumes:
+      - {{ nas_media_mount }}/downloads/completed:/downloads
+      - /services/unpackerr/config:/config
+    restart: always
+    environment:
+      - TZ={{ time_zone }}
     logging:
       driver: "json-file"
       options:
@@ -774,6 +790,7 @@ services:
       - TZ={{ time_zone }}
     volumes:
       - /services/{{ service.name }}/config:/config
+      - {{ nas_media_mount }}:/media
       - {{ nas_media_mount }}/downloads:/downloads
 {% for content_type in service.content %}
       - {{ nas_media_mount }}/{{ content_type }}:/{{ content_type }}
