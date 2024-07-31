@@ -140,9 +140,7 @@ services:
       - TZ={{ time_zone }}
     volumes:
       - /services/bazarr/config:/config
-      - {{ nas_media_mount }}/movies:/movies
-      - {{ nas_media_mount }}/tvshows:/tvshows
-      - {{ nas_media_mount }}/anime:/anime
+      - {{ nas_media_mount }}:/media
     ports:
       - 6767:6767
     restart: unless-stopped
@@ -193,6 +191,7 @@ services:
       - "CALIBRE_OVERRIDE_DATABASE_PATH=/config/metadata.db"
     volumes:
       - /services/calibre/config:/config
+      - {{ nas_media_mount }}:/media
       - {{ usb_hdd_mount }}/calibre_library:/library
       - {{ nas_media_mount }}/books:/books
       - {{ nas_media_mount }}/comics:/comics
@@ -225,6 +224,9 @@ services:
     volumes:
       - /services/calibre-web/config:/config
       - {{ usb_hdd_mount }}/calibre_library:/books
+      - type: bind
+        source: /services/calibre/config/metadata.db
+        target: /books/metadata.db
     ports:
       - 8083:8083
     restart: unless-stopped
@@ -674,7 +676,7 @@ services:
     image: golift/unpackerr:latest
     container_name: unpackerr
     volumes:
-      - {{ nas_media_mount }}/downloads/completed:/downloads
+      - {{ nas_media_mount }}:/media
       - /services/unpackerr/config:/config
     restart: always
     environment:
@@ -791,10 +793,6 @@ services:
     volumes:
       - /services/{{ service.name }}/config:/config
       - {{ nas_media_mount }}:/media
-      - {{ nas_media_mount }}/downloads:/downloads
-{% for content_type in service.content %}
-      - {{ nas_media_mount }}/{{ content_type }}:/{{ content_type }}
-{% endfor %}
     ports: {{ service.ports }}
     restart: unless-stopped
     logging:
