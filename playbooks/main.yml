@@ -23,7 +23,6 @@
       environment:
         BW_PASSWORD: "{{ bitwarden_secret.BW_PASSWORD }}"
       register: bw_session_key
-      no_log: true
 
     - name: Lookup Bitwarden item for secrets
       shell: |

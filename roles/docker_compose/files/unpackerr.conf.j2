@@ -59,7 +59,7 @@ api_key = "{{ bw_secrets.radarr_apikey }}"
 ## File system path where downloaded Radarr items are located.
 #paths = ['/downloads']
 ## Default protocols is torrents. Alternative: "torrent,usenet"
-protocols = "torrent,usenet"
+protocols = "torrent"
 ## How long to wait for a reply from the backend.
 #timeout = "10s"
 ## How long to wait after import before deleting the extracted items.
@@ -95,7 +95,7 @@ api_key = "{{ bw_secrets.sonarr_apikey }}"
 ## File system path where downloaded Sonarr items are located.
 #paths = ['/downloads']
 ## Default protocols is torrent. Alternative: "torrent,usenet"
-protocols = "torrent,usenet"
+protocols = "torrent"
 ## How long to wait for a reply from the backend.
 #timeout = "10s"
 ## How long to wait after import before deleting the extracted items.
@@ -114,7 +114,7 @@ protocols = "torrent,usenet"
 url = "{{ bw_secrets.unpackerr_discord_webhook }}"
 name = "Discord"
 #silent = true
-#events = []
+events = [1,2,3,4,9] # https://unpackerr.zip/docs/install/configuration#event-ids
 ## Advanced Optional Webhook Configuration
 nickname = "Unpackerr"
 #channel = ""
