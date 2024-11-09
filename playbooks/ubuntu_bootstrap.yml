@@ -1,11 +1,10 @@
 # First run needs password for SSH and sudo:
 # ansible-playbook playbooks/ubuntu_bootstrap.yml -k --ask-become-pass
 ---
-- name: Configure Ubuntu server for user 'ant'
-  hosts: argobox
+- name: Update hostname and machine ID
+  hosts: k3s
   become: true
   tasks:
-
     - name: Enable passwordless sudo
       lineinfile:
         path: /etc/sudoers
@@ -14,38 +13,36 @@
         line: 'ant ALL=(ALL) NOPASSWD: ALL'
         validate: 'visudo -cf %s'
 
-    - name: Add public key to authorized_keys
-      authorized_key:
-        user: ant
-        state: present
-        key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+    - name: Set the hostname to ship00
+      hostname:
+        name: ship00
+      register: hostname
 
-    - name: Config passwordless SSH
+    - name: Update /etc/hosts with new hostname
       lineinfile:
-        path: /etc/ssh/sshd_config
-        regexp: '^PasswordAuthentication'
-        line: 'PasswordAuthentication no'
-      notify:
-        - restart sshd
-
-    - name: Upgrade kernel
-      apt:
-        name: linux-image-6.5.0-28-generic
+        path: /etc/hosts
+        regexp: '^127\.0\.1\.1\s+'
+        line: '127.0.1.1 ship00'
         state: present
-        update_cache: yes
-        force_apt_get: yes
+        backup: yes
 
-    - name: Reboot after kernel upgrade
+    - name: Remove existing machine-id
+      file:
+        path: /etc/machine-id
+        state: absent
+      when: hostname is changed
+
+    - name: Generate new machine-id
+      command: systemd-machine-id-setup
+      changed_when: "'Initializing machine ID from random generator' in machine_id_setup.stdout"
+      when: hostname is changed
+
+    - name: Reboot the server to apply changes
       reboot:
-        msg: "Rebooting after kernel upgrade"
-        connect_timeout: 5
-        reboot_timeout: 600
-        pre_reboot_delay: 0
-        post_reboot_delay: 30
-        test_command: uptime
+        msg: "Rebooting to apply hostname and machine ID changes"
+        pre_reboot_delay: 5
+      when: hostname is changed
 
-  handlers:
-    - name: restart sshd
-      service:
-        name: ssh
-        state: restarted
+    - name: Stop the playbook after reboot
+      meta: end_play
+      when: true  # Always stop after rebooting
