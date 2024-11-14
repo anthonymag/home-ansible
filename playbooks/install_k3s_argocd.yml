@@ -1,42 +1,63 @@
----
-- name: Install K3s and Deploy ArgoCD
-  hosts: k3s_cluster
-  become: yes
+# ---
+# - name: Install K3s and Deploy ArgoCD
+#   hosts: k3s_cluster
+#   become: yes
+#   tasks:
+#     - name: Download and Execute K3s Installation Script
+#       ansible.builtin.shell: |
+#         curl -sfL https://get.k3s.io | sh -
+#       args:
+#         creates: /usr/local/bin/k3s
+
+#     - name: Wait for K3s to be Ready
+#       ansible.builtin.wait_for:
+#         #path: /var/run/k3s/k3s.sock
+#         path: /var/run/k3s/containerd/containerd.sock
+#         state: present
+#         timeout: 300
+
+#     - name: Install ArgoCD
+#       ansible.builtin.shell: |
+#         kubectl create namespace argocd || true
+#         kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+#       environment:
+#         KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+
+#     - name: Wait for ArgoCD Server to be Ready
+#       ansible.builtin.shell: |
+#         kubectl wait --for=condition=available --timeout=600s deployment/argocd-server -n argocd
+#       environment:
+#         KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+
+#     - name: Get ArgoCD Admin Password
+#       ansible.builtin.shell: |
+#         kubectl get pods -n argocd -l app.kubernetes.io/name=argocd-server -o name | cut -d'/' -f 2
+#       environment:
+#         KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+#       register: argocd_admin
+
+#     - name: Display ArgoCD Admin Password
+#       ansible.builtin.debug:
+#         msg: "ArgoCD Admin Password: {{ argocd_admin.stdout }}"
+
+- name: Prepare k3s-ansible
+  hosts: localhost
   tasks:
-    - name: Download and Execute K3s Installation Script
-      ansible.builtin.shell: |
-        curl -sfL https://get.k3s.io | sh -
-      args:
-        creates: /usr/local/bin/k3s
+    - name: Git submodule update
+      command:
+        chdir: ../
+        cmd: git submodule update --init --recursive
 
-    - name: Wait for K3s to be Ready
-      ansible.builtin.wait_for:
-        #path: /var/run/k3s/k3s.sock
-        path: /var/run/k3s/containerd/containerd.sock
-        state: present
-        timeout: 300
+    - name: Replace inventory file
+      copy:
+        src: ../inventory-new.yml
+        dest: ../roles/k3s/files/k3s-ansible/inventory.yml
+        mode: '0644'
 
-    - name: Install ArgoCD
-      ansible.builtin.shell: |
-        kubectl create namespace argocd || true
-        kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-      environment:
-        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
-
-    - name: Wait for ArgoCD Server to be Ready
-      ansible.builtin.shell: |
-        kubectl wait --for=condition=available --timeout=600s deployment/argocd-server -n argocd
-      environment:
-        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
-
-    - name: Get ArgoCD Admin Password
-      ansible.builtin.shell: |
-        kubectl get pods -n argocd -l app.kubernetes.io/name=argocd-server -o name | cut -d'/' -f 2
-      environment:
-        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
-      register: argocd_admin
-
-    - name: Display ArgoCD Admin Password
-      ansible.builtin.debug:
-        msg: "ArgoCD Admin Password: {{ argocd_admin.stdout }}"
-
+# - name: Install k3s
+#   hosts: k3s
+#   become: true
+#   vars_files:
+#     - ../../vars/vars.yml
+#   roles:
+#     - role: k3s
