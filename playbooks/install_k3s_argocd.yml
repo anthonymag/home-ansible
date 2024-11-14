@@ -40,7 +40,7 @@
 #       ansible.builtin.debug:
 #         msg: "ArgoCD Admin Password: {{ argocd_admin.stdout }}"
 
-- name: Prepare k3s-ansible
+- name: Prepare and run k3s-ansible
   hosts: localhost
   tasks:
     - name: Git submodule update
@@ -53,6 +53,18 @@
         src: ../inventory-new.yml
         dest: ../roles/k3s/files/k3s-ansible/inventory.yml
         mode: '0644'
+
+    # Done manually for now
+    # - name: Copy in roles
+    #   copy:
+    #     recursive: yes
+    #     src: ../roles/k3s/files/k3s-ansible/roles/*
+    #     dest: ../roles/
+    #     modes: '0644'
+
+- name: Include k3s-ansible playbook
+  ansible.builtin.import_playbook: ../k3s-ansible/playbooks/site.yml
+
 
 # - name: Install k3s
 #   hosts: k3s
