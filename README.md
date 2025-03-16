@@ -57,7 +57,7 @@ ls ~/.kube/config.new
 Set context
 ```
 kubectl config use-context ~/.kube/config.new k3s-ansible
-```
+``` 
 
 Note nodes
 
@@ -72,4 +72,20 @@ Make sure `helm` is installed
 
 ```
 ansible-playbook playbooks/install_base_charts.yml
+```
+
+## Log into ArgoCD
+
+Forward ports
+
+```
+kubectl -n argocd port-forward services/argocd-server 8443:https
+```
+
+Browse to https://localhost:8443
+
+Log in with the secret from the chart (you'll have to decode with base64)
+
+```
+kubectl get secret -n argocd argocd-initial-admin-secret -o yaml
 ```
