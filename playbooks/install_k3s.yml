@@ -63,7 +63,7 @@
     #     modes: '0644'
 
 - name: Include k3s-ansible playbook
-  ansible.builtin.import_playbook: ../k3s-ansible/playbooks/site.yml
+  ansible.builtin.import_playbook: ../roles/k3s/files/k3s-ansible/playbooks/site.yml
 
 
 # - name: Install k3s
