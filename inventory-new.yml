@@ -4,11 +4,11 @@ k3s_cluster:
     # master
     server:
       hosts:
-        10.66.88.110:  
+        10.66.88.131:  
     # runner
     agent:
       hosts:
-        10.66.88.111:
+        10.66.88.130:
 
   # Required Vars
   vars:
