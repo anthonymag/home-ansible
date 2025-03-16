@@ -13,16 +13,16 @@
         line: 'ant ALL=(ALL) NOPASSWD: ALL'
         validate: 'visudo -cf %s'
 
-    - name: Set the hostname to ship00
+    - name: Set the hostname to svc-server00
       hostname:
-        name: ship00
+        name: svc-server00
       register: hostname
 
     - name: Update /etc/hosts with new hostname
       lineinfile:
         path: /etc/hosts
         regexp: '^127\.0\.1\.1\s+'
-        line: '127.0.1.1 ship00'
+        line: '127.0.1.1 svc-server00'
         state: present
         backup: yes
 
@@ -34,7 +34,7 @@
 
     - name: Generate new machine-id
       command: systemd-machine-id-setup
-      changed_when: "'Initializing machine ID from random generator' in machine_id_setup.stdout"
+      #changed_when: "'Initializing machine ID from random generator' in machine_id_setup.stdout"
       when: hostname is changed
 
     - name: Reboot the server to apply changes
