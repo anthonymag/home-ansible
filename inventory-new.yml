@@ -3,11 +3,11 @@ k3s_cluster:
   children:
     server:
       hosts:
-        10.66.88.30:  
-        10.66.88.31:  
+        svc-server00:  
+        svc-server01:  
     agent:
       hosts:
-        10.66.88.20:
+        svc-agent00:
 
   # Required Vars
   vars:
