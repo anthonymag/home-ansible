@@ -35,6 +35,12 @@ get the new ip(s)
 ip a
 ```
 
+Log into pfSense and assign a static IP (iterating from 20 for agents, 30 for servers)
+
+Log into pi-hole and assign DNS names.
+
+Reboot server(s)
+
 Update the Ips in inventory-new.yml
 
 Get the roles from the k3s-ansible playbook (TODO: fix this)
