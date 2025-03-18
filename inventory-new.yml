@@ -1,14 +1,13 @@
 ---
 k3s_cluster:
   children:
-    # master
     server:
       hosts:
-        10.66.88.131:  
-    # runner
+        10.66.88.30:  
+        10.66.88.31:  
     agent:
       hosts:
-        10.66.88.130:
+        10.66.88.20:
 
   # Required Vars
   vars:

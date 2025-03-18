@@ -13,16 +13,16 @@
         line: 'ant ALL=(ALL) NOPASSWD: ALL'
         validate: 'visudo -cf %s'
 
-    - name: Set the hostname to svc-server00
+    - name: Set the hostname to svc-server01
       hostname:
-        name: svc-server00
+        name: svc-server01
       register: hostname
 
     - name: Update /etc/hosts with new hostname
       lineinfile:
         path: /etc/hosts
         regexp: '^127\.0\.1\.1\s+'
-        line: '127.0.1.1 svc-server00'
+        line: '127.0.1.1 svc-server01'
         state: present
         backup: yes
 
